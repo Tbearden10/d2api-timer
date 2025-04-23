@@ -22,9 +22,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No current activity found' }, { status: 404 });
     }
 
-    
-
-    console.log('Current activity updated. Returning latest data.');
     const rawResult = { Response: result.Response };
     return NextResponse.json(rawResult);
   } catch (error) {
