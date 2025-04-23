@@ -7,10 +7,9 @@ export async function POST(req: NextRequest) {
 
     // Validate input
     if (!membershipType || !membershipId) {
-      return NextResponse.json(
-        { error: 'Missing membershipType or membershipId' },
-        { status: 400 }
-      );
+      if (!membershipType || !membershipId) {
+        return NextResponse.json({ error: 'Missing membershipType or membershipId' }, { status: 400 });
+      }
     }
 
     // Fetch current activity and transitory data from Bungie API

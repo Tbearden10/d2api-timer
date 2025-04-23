@@ -1,33 +1,44 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TimerProps {
-  startTime: string;
+  startTime: string | null;
 }
 
-export default function Timer({ startTime }: TimerProps) {
-  const [elapsed, setElapsed] = useState(0);
+const Timer: React.FC<TimerProps> = ({ startTime }) => {
+  const [elapsedTime, setElapsedTime] = useState('...');
+
+  const formatTime = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    let timeString = '';
+    if (hrs > 0) {
+      timeString += `${hrs}hr `;
+    }
+    timeString += `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+    return timeString;
+  };
 
   useEffect(() => {
+    if (!startTime) {
+      setElapsedTime('...');
+      return;
+    }
+
     const start = new Date(startTime).getTime();
-    const interval = setInterval(() => {
-      setElapsed(Date.now() - start);
-    }, 10);
+    const updateElapsed = () => {
+      const now = Date.now();
+      const seconds = Math.floor((now - start) / 1000);
+      setElapsedTime(formatTime(seconds));
+    };
+
+    updateElapsed();
+    const interval = setInterval(updateElapsed, 1000);
+
     return () => clearInterval(interval);
   }, [startTime]);
 
-  const format = (ms: number) => {
-    const h = String(Math.floor(ms / 3600000)).padStart(2, '0');
-    const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
-    const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
-    const msRemaining = String(ms % 1000).padStart(3, '0');
-    return `${h}:${m}:${s}.${msRemaining}`;
-  };
+  return <p id="timer">{elapsedTime}</p>;
+};
 
-  return (
-    <div className="casio-watch">
-      {format(elapsed)}
-    </div>
-  );
-}
+export default Timer;
