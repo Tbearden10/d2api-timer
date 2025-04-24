@@ -87,7 +87,7 @@ const BackgroundCanvas = () => {
       return { geometry, points: comets };
     };
 
-    const { geometry: cometGeo, points: cometPoints } = generateComets();
+    const { geometry: cometGeo } = generateComets();
 
     generateParticles();
 
