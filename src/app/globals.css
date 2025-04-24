@@ -18,33 +18,34 @@ html, body {
   z-index: 1;
 }
 
-/* Main content area */
-main {
-  flex: 1; /* Take up remaining space between header and footer */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px; /* Even spacing between components */
-  padding: 0px;
-  width: 100%; /* Full width of the page */
-  box-sizing: border-box;
-  overflow: hidden;
-  z-index: 10;
-}
-
 /* Footer styles */
 footer {
-  width: 100%; /* Full width of the page */
+  width: 100%;
   background: linear-gradient(to right, rgba(26, 26, 26, 0.7), rgba(51, 51, 51, 0.5), rgba(26, 26, 26, 0.7));
-  border-top: 1px solid #444; /* Subtle border for separation */
+  border-top: 1px solid #444;
   padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
-  animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
-  z-index: 10;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+  z-index: 10; /* Ensure it appears above the background */
+  position: fixed; /* Stick to the bottom of the viewport */
+  bottom: 0;
+  left: 0;
+}
+
+/* Main content area */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  padding-bottom: 50px; /* Add padding to prevent content from overlapping the footer */
+  box-sizing: border-box;
+  position: relative;
 }
 
 footer span {
