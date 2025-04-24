@@ -14,6 +14,7 @@ html, body {
   color: #fff; /* White text for readability */
   display: flex;
   flex-direction: column; /* Stack content vertically */
+  z-index: 1;
 }
 
 /* Main content area */
@@ -24,9 +25,10 @@ main {
   align-items: center;
   justify-content: center;
   gap: 20px; /* Even spacing between components */
-  padding: 20px;
+  padding: 0px;
   width: 100%; /* Full width of the page */
   box-sizing: border-box;
+  z-index: 10;
 }
 
 /* Footer styles */
@@ -40,6 +42,7 @@ footer {
   justify-content: center;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
   animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
+  z-index: 10;
 }
 
 footer span {
@@ -58,6 +61,7 @@ footer span {
   box-sizing: border-box;
 }
 
+
 /* Shared container styles */
 .container {
   width: 100%;
@@ -70,6 +74,44 @@ footer span {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
   margin: 5px 0; /* Add vertical spacing between containers */
   animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
+}
+
+/* Activity container styles */
+.activity-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Add spacing between heading and meta content */
+  padding: 20px;
+  background: #2a2a2a; /* Dark background for contrast */
+  border-radius: 5px; /* Slightly rounded corners */
+  text-align: center;
+}
+
+.meta-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Add spacing between meta items */
+  font-size: 1rem;
+  color: #fff; /* White text for readability */
+}
+
+.activity-name {
+  font-weight: bold;
+}
+
+.activity-mode {
+  font-style: italic;
+}
+
+.activity-duration {
+  color: #00ff00; /* Neon green for duration */
+}
+
+.separator {
+  color: #888; /* Subtle gray for the separator */
 }
 
 /* Search bar styles */
@@ -120,7 +162,7 @@ footer span {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1a1a1a; /* Dark background */
+  background: #f0e9e9; /* Dark background */
   z-index: 9999; /* Ensure it appears above all other content */
 }
 
@@ -146,3 +188,12 @@ footer span {
     flex-direction: column; /* Stack input and button vertically */
   }
 }
+
+.divider {
+  width: 80%; /* Adjust width as needed */
+  height: 1px;
+  background-color: #444; /* Subtle gray color */
+  margin: 10px auto; /* Add spacing around the line */
+  border: none;
+}
+

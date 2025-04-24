@@ -12,9 +12,14 @@ const ActivityContainer: React.FC<ActivityContainerProps> = ({ recentActivity })
   return (
     <div className="activity-container">
       <h1>Recent Activity</h1>
-      <p>Mode: {recentActivity.mode}</p>
-      <p>Name: {recentActivity.name}</p>
-      <p>Duration: {recentActivity.duration}</p>
+      <hr className="divider" /> {/* Add a small line */}
+      <div className="meta-content">
+        <p className="activity-name">{recentActivity.name}</p>
+        <span className="separator">|</span>
+        <p className="activity-mode">{recentActivity.mode}</p>
+        <span className="separator">|</span>
+        <p className="activity-duration">{recentActivity.duration}</p>
+      </div>
     </div>
   );
 };
