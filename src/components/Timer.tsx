@@ -24,7 +24,10 @@ const Timer: React.FC<TimerProps> = ({ startTime, activityName, bungieName }) =>
 
   useEffect(() => {
     if (!startTime) {
-      setElapsedTime("00:00:00.000");
+      setElapsedTime("00:00:00.000"); // Reset timer to 0 if no activity
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current); // Stop any ongoing animation
+      }
       return;
     }
 
@@ -48,19 +51,13 @@ const Timer: React.FC<TimerProps> = ({ startTime, activityName, bungieName }) =>
 
   return (
     <div>
-      {startTime ? (
-        <>
-          <h1 className="timer">{elapsedTime}</h1>
-          <hr className="divider" />
-          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-            <p>{activityName || "Unknown Space"}</p>
-            <span>|</span>
-            <p>{bungieName}</p>
-          </div>
-        </>
-      ) : (
-        <p>It seems like there is no ongoing activity right now.</p>
-      )}
+      <h1 className="timer">{elapsedTime}</h1>
+      <hr className="divider" />
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+        <p>{activityName || "Not in Activity"}</p>
+        <span>|</span>
+        <p>{bungieName}</p>
+      </div>
     </div>
   );
 };

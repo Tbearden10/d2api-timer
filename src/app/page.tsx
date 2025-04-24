@@ -163,16 +163,17 @@ const HomePage: React.FC = () => {
         currentActivityData.dateActivityStarted;
   
       // Step 3: Fetch Current Activity Details (if in session)
-      let newActivity = { name: 'No activity in progress', startTime: null };
+      // Step 3: Fetch Current Activity Details (if in session)
+      let newActivity = { name: 'Not in Activity', startTime: null };
       if (isInSession) {
         const activityDefinitionResponse = await fetch('/api/activity-definition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ activityHash: currentActivityData.currentActivityHash }),
         });
-  
+
         const activityDefinitionData = await activityDefinitionResponse.json();
-  
+
         newActivity = {
           name:
             activityDefinitionData.Response?.displayProperties?.name ||
@@ -180,8 +181,10 @@ const HomePage: React.FC = () => {
           startTime: currentActivityData.dateActivityStarted,
         };
 
+        // Treat "Orbit" as "Not in Activity"
         if (currentActivityData.currentActivityHash === 82913930) {
-          newActivity.name = 'Orbit';
+          newActivity.name = 'Not in Activity';
+          newActivity.startTime = null; // Ensure the timer is reset to 0
         }
       }
       setCurrentActivity(newActivity);

@@ -67,18 +67,22 @@ footer span {
 
 /* Transparent activity container */
 .activity-container {
-  background: transparent; /* Fully transparent background */
-  border: none; /* Remove border */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+  border-radius: 8px; /* Rounded corners */
   padding: 15px;
-  box-shadow: none; /* Remove shadow */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
   overflow: hidden;
 }
 /* Transparent timer container */
 .timer-container {
-  background: transparent; /* Fully transparent background */
-  border: none; /* Remove border */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+  border-radius: 8px; /* Rounded corners */
   padding: 15px;
-  box-shadow: none; /* Remove shadow */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
   overflow: hidden;
 }
 
@@ -194,15 +198,18 @@ footer span {
 
 /* Search bar styles with transparency */
 .search-bar {
-  display: flex;
-  flex-wrap: wrap; /* Allow wrapping if needed */
-  gap: 10px; /* Add spacing between input and button */
-  justify-content: center; /* Center the content */
-  align-items: center; /* Align items vertically */
-  width: 100%;
-  background: transparent; /* Fully transparent background */
-  border: none; /* Remove border */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+  border-radius: 8px; /* Rounded corners */
   padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .search-bar input {
@@ -213,7 +220,7 @@ footer span {
   border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
   border-radius: 5px;
   outline: none;
-  background: rgba(255, 255, 255, 0.1); /* Transparent white background */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
   color: #fff;
 }
 
@@ -222,10 +229,12 @@ footer span {
   font-size: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1); /* Transparent white background */
+  background: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
   color: #fff;
   cursor: pointer;
   transition: background 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
 }
 
 .search-bar button:hover {
@@ -276,15 +285,17 @@ footer span {
 }
 
 .error-container {
-  background: #ff4d4d; /* Red background for error */
-  color: #fff; /* White text for contrast */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+  border-radius: 8px; /* Rounded corners */
   padding: 15px;
-  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  color: #fff; /* White text for contrast */
   text-align: center;
   margin: 10px auto;
   max-width: 600px;
   font-size: 1rem;
   font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
