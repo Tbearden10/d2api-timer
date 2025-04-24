@@ -14,6 +14,7 @@ html, body {
   color: #fff; /* White text for readability */
   display: flex;
   flex-direction: column; /* Stack content vertically */
+  overflow: hidden;
   z-index: 1;
 }
 
@@ -28,6 +29,7 @@ main {
   padding: 0px;
   width: 100%; /* Full width of the page */
   box-sizing: border-box;
+  overflow: hidden;
   z-index: 10;
 }
 
@@ -58,6 +60,7 @@ footer span {
   gap: 20px; /* Add spacing between child components */
   padding: 20px;
   width: 100%; /* Full width of the page */
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -67,6 +70,7 @@ footer span {
   border: none; /* Remove border */
   padding: 15px;
   box-shadow: none; /* Remove shadow */
+  overflow: hidden;
 }
 /* Transparent timer container */
 .timer-container {
@@ -74,6 +78,7 @@ footer span {
   border: none; /* Remove border */
   padding: 15px;
   box-shadow: none; /* Remove shadow */
+  overflow: hidden;
 }
 
 /* Divider styles */
@@ -135,8 +140,18 @@ footer span {
   color: #fff;
 }
 
+/* Styling for the activity name */
 .activity-name {
-  color: #fff; /* White for the name */
+  font-size: 1.5rem; /* Adjust font size */
+  font-weight: bold; /* Make it bold */
+  color: #fff; /* White text */
+  text-align: center; /* Center-align the text */
+  word-wrap: break-word; /* Allow wrapping for long names */
+  overflow-wrap: break-word; /* Ensure wrapping for long words */
+  margin: 10px 0; /* Add spacing above and below */
+  display: flex; /* Use flexbox for alignment */
+  justify-content: center; /* Center-align horizontally */
+  align-items: center; /* Center-align vertically */
 }
 
 .activity-duration {
@@ -232,6 +247,11 @@ footer span {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .activity-name-duration {
+    text-align: center; /* Ensure text is centered on mobile */
+    justify-content: center; /* Center-align when wrapping */
+  }
+
   .container {
     width: 95%; /* Use more of the screen on smaller devices */
   }

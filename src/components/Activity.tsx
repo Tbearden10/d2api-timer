@@ -15,7 +15,7 @@ const Activity: React.FC<ActivityProps> = ({
 }) => {
   return (
     <div>
-      <h1>{activityName || "Unknown Activity"}</h1>
+      <h1 className="activity-name">{activityName || "Unknown Activity"}</h1>
       <hr className="divider" />
       <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
         <p>{activityMode}</p>

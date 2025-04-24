@@ -39,22 +39,6 @@ const BackgroundCanvas = () => {
     const stars = new THREE.Points(starGeometry, starMaterial);
     scene.add(stars);
 
-    // Create shooting stars
-    const shootingStars: THREE.Mesh[] = [];
-    const shootingStarGeometry = new THREE.SphereGeometry(0.2, 16, 16);
-    const shootingStarMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 }); // Gold color
-
-    for (let i = 0; i < 5; i++) {
-      const shootingStar = new THREE.Mesh(shootingStarGeometry, shootingStarMaterial);
-      shootingStar.position.set(
-        Math.random() * 2000 - 1000,
-        Math.random() * 2000 - 1000,
-        Math.random() * 2000 - 1000
-      );
-      scene.add(shootingStar);
-      shootingStars.push(shootingStar);
-    }
-
     // Handle window resizing
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -71,21 +55,6 @@ const BackgroundCanvas = () => {
       // Rotate stars
       stars.rotation.x += 0.0005;
       stars.rotation.y += 0.0005;
-
-      // Move shooting stars
-      shootingStars.forEach((star) => {
-        star.position.x -= 10;
-        star.position.y -= 5;
-
-        // Reset position if out of bounds
-        if (star.position.x < -1000 || star.position.y < -1000) {
-          star.position.set(
-            Math.random() * 2000 - 1000,
-            Math.random() * 2000 - 1000,
-            Math.random() * 2000 - 1000
-          );
-        }
-      });
 
       renderer.render(scene, camera);
     };
