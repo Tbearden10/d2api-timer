@@ -16,52 +16,54 @@ const BackgroundCanvas = () => {
       canvasRef.current.appendChild(renderer.domElement);
     }
 
-    // Define a pool of deep, dark colors
+    // Expanded dark color palette
     const darkColors = [
-      "#0d1b2a", // Deep navy blue
-      "#1b263b", // Dark blue
-      "#0f3d3e", // Dark teal green
-      "#1a1a1d", // Almost black
-      "#2c2c54", // Deep indigo
-      "#3a0ca3", // Dark purple
-      "#4a0d67", // Deep pink-purple
-      "#2d6a4f", // Dark green
-      "#3b3b58", // Dark gray-blue
+      "#0d1b2a", "#1b263b", "#0f3d3e", "#1a1a1d", 
+      "#2c2c54", "#3a0ca3", "#4a0d67", "#2d6a4f", 
+      "#3b3b58", "#222831", "#393e46", "#1e2022", 
+      "#2b2d42", "#4a4e69", "#374151"
     ];
 
-    // Randomly select a background color from the pool
-    const selectedColor = darkColors[Math.floor(Math.random() * darkColors.length)];
-    scene.background = new THREE.Color(selectedColor);
+    // Randomly select a gradient of two colors
+    const color1 = new THREE.Color(darkColors[Math.floor(Math.random() * darkColors.length)]);
+    const color2 = new THREE.Color(darkColors[Math.floor(Math.random() * darkColors.length)]);
+    scene.background = color1.clone().lerp(color2, 0.5);
 
     // Particle system setup
     const particleGeometry = new THREE.BufferGeometry();
     const particleMaterial = new THREE.PointsMaterial({
-      size: 2,
+      size: 2.5,
       vertexColors: true, // Enable per-particle colors
+      transparent: true,
+      opacity: 0.9, // Slight transparency
     });
 
-    const positions = [];
-    const colors = [];
+    const positions: number[] = [];
+    const colors: number[] = [];
+    const sizes: number[] = [];
 
     // Generate particles for stars
     const generateParticles = () => {
-      const particleCount = 1500; // Number of particles
+      const particleCount = 2000; // Increased number of particles
       for (let i = 0; i < particleCount; i++) {
         // Random positions for stars
         positions.push(
-          Math.random() * 2000 - 1000, // X position
-          Math.random() * 2000 - 1000, // Y position
-          Math.random() * 2000 - 1000 // Z position
+          Math.random() * 4000 - 2000, // X position
+          Math.random() * 4000 - 2000, // Y position
+          Math.random() * 4000 - 2000  // Z position
         );
-        // White stars
-        const color = new THREE.Color(0xffffff);
-        colors.push(color.r, color.g, color.b);
+        // Randomized star colors (white with a subtle tint)
+        const starColor = new THREE.Color().setHSL(Math.random(), 0.7, 0.8);
+        colors.push(starColor.r, starColor.g, starColor.b);
+
+        // Random sizes for twinkling effect
+        sizes.push(1 + Math.random() * 3);
       }
     };
 
     const generateComets = () => {
       const geometry = new THREE.BufferGeometry();
-      const cometCount = 10;
+      const cometCount = 12;
       const cometPositions = [];
       const cometColors = [];
 
@@ -71,14 +73,14 @@ const BackgroundCanvas = () => {
           Math.random() * 4000 - 2000,
           Math.random() * 4000 - 2000
         );
-        const color = new THREE.Color(1, 1, Math.random());
-        cometColors.push(color.r, color.g, color.b);
+        const cometColor = new THREE.Color(1, Math.random(), Math.random() * 0.5);
+        cometColors.push(cometColor.r, cometColor.g, cometColor.b);
       }
 
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(cometPositions, 3));
       geometry.setAttribute("color", new THREE.Float32BufferAttribute(cometColors, 3));
 
-      const material = new THREE.PointsMaterial({ size: 10, vertexColors: true, transparent: true, opacity: 0.8 });
+      const material = new THREE.PointsMaterial({ size: 12, vertexColors: true, transparent: true, opacity: 0.7 });
       const comets = new THREE.Points(geometry, material);
       scene.add(comets);
 
@@ -91,6 +93,7 @@ const BackgroundCanvas = () => {
 
     particleGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     particleGeometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+    particleGeometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
 
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
@@ -112,11 +115,20 @@ const BackgroundCanvas = () => {
       particles.rotation.x += 0.0005;
       particles.rotation.y += 0.0005;
 
+      // Twinkling effect for stars
+      const sizesAttr = particleGeometry.attributes.size;
+      for (let i = 0; i < sizesAttr.array.length; i++) {
+        sizesAttr.array[i] += (Math.random() - 0.5) * 0.1; // Slight size variation
+        if (sizesAttr.array[i] < 1) sizesAttr.array[i] = 1; // Ensure minimum size
+        if (sizesAttr.array[i] > 4) sizesAttr.array[i] = 4; // Ensure maximum size
+      }
+      sizesAttr.needsUpdate = true;
+
       // Animate comets
       const cometPos = cometGeo.attributes.position.array;
       for (let i = 0; i < cometPos.length; i += 3) {
-        cometPos[i] += 5; // X
-        cometPos[i + 1] += 2; // Y
+        cometPos[i] += 8; // X
+        cometPos[i + 1] += 3; // Y
         if (cometPos[i] > 2000 || cometPos[i + 1] > 2000) {
           cometPos[i] = -2000 + Math.random() * 100;
           cometPos[i + 1] = -2000 + Math.random() * 100;
