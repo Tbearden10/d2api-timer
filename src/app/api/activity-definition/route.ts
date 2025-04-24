@@ -1,50 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchBungieData } from '@/lib/BungieApi';
-import { redis } from '@/lib/redis';
+
+const activityDefinitionCache = new Map();
 
 export async function POST(req: NextRequest) {
   try {
     const { activityHash } = await req.json();
 
-    // Validate input
     if (!activityHash) {
       return NextResponse.json({ error: 'Missing activityHash' }, { status: 400 });
     }
 
-    // Check cache
-    const cacheKey = `activity:${activityHash}`;
-    const cachedData = await redis.get(cacheKey);
-    if (cachedData) {
-      return NextResponse.json(cachedData);
+    // Check Redis Cache (or in-memory cache for simplicity here)
+    if (activityDefinitionCache.has(activityHash)) {
+      const cachedResponse = activityDefinitionCache.get(activityHash);
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          'Cache-Control': 'public, max-age=86400', // Cache in the browser for 24 hours
+        },
+      });
     }
 
-    // Fetch data from Bungie API
+    // Fetch from Bungie API
     const result = await fetchBungieData(
       `/Destiny2/Manifest/DestinyActivityDefinition/${activityHash}`,
       'GET'
     );
 
-    const response = result.Response;
-    if (response) {
-      const activityData = {
-        name: response.displayProperties?.name || 'Unknown Activity',
-        mode: response.activityModeTypes?.[0] || 'Unknown Mode',
-        hash: activityHash,
-      };
+    // Cache the result (for both Redis or in-memory cache)
+    activityDefinitionCache.set(activityHash, result);
 
-      // Cache the result
-      await redis.set(cacheKey, JSON.stringify(activityData), { ex: 3600 }); // Cache for 1 hour
-
-      return NextResponse.json(activityData);
-    }
-
-    return NextResponse.json({ error: 'Activity not found' }, { status: 404 });
+    return NextResponse.json(result, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400', // Cache in the browser for 24 hours
+      },
+    });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-};

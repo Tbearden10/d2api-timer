@@ -1,5 +1,11 @@
 'use client';
 
+import React, { useState, useEffect, useRef } from 'react';
+import SearchBar from '../components/SearchBar';
+import TimerContainer from '../components/TimerContainer';
+import LoadingIndicator from '../components/LoadingIndicator'; // Import the techno wave loader
+import ActivityContainer from '@/components/ActivityContainer';
+
 const activityModes = { 
   "0": "None",
   "2": "Story",
@@ -88,15 +94,10 @@ const activityModes = {
   "92": "Relic"
 }
 
-
-import React, { useState, useEffect, useRef } from 'react';
-import SearchBar from '../components/SearchBar';
-import TimerContainer from '../components/TimerContainer';
-import LoadingIndicator from '../components/LoadingIndicator';
-
-const REFRESH_INTERVAL_MS = 30000; // Auto-fetch every 30 seconds
+const REFRESH_INTERVAL_MS = 10000; // Auto-fetch every 30 seconds
 
 const HomePage: React.FC = () => {
+  const [bungieName, setBungieName] = useState('');
   const [currentActivity, setCurrentActivity] = useState<{ name: string | null; startTime: string | null }>({
     name: null,
     startTime: null,
@@ -104,30 +105,29 @@ const HomePage: React.FC = () => {
   const [recentActivity, setRecentActivity] = useState<{ mode: string; name: string; duration: string } | null>(null);
   const [error, setError] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [loading, setLoading] = useState(false); // Track loading state
 
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchActivityData = async (bungieName: string) => {
+  const fetchActivityData = async (bungieName: string, isSearch: boolean = false) => {
     try {
+      if (isSearch) {
+        setLoading(true); // Set loading to true only for manual search
+      }
+  
       // Step 1: Resolve Bungie ID
       const searchResponse = await fetch('/api/bungie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bungieName }),
       });
+      const searchData = await searchResponse.json();
   
-      let searchData;
-      try {
-        searchData = await searchResponse.json();
-      } catch {
-        throw new Error('Failed to parse Bungie search response');
-      }
-  
-      if (!searchData.membershipId || !searchData.membershipType) {
+      if (!searchData.Response || searchData.Response.length === 0) {
         throw new Error('Player not found');
       }
   
-      const { membershipId, membershipType } = searchData;
+      const { membershipId, membershipType } = searchData.Response[0];
   
       // Step 2: Fetch Profile Data
       const profileResponse = await fetch('/api/current-activity', {
@@ -135,128 +135,113 @@ const HomePage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ membershipType, membershipId }),
       });
+      const profileData = await profileResponse.json();
   
-      let profileData;
-      try {
-        profileData = await profileResponse.json();
-      } catch {
-        throw new Error('Failed to parse profile response');
+      if (!profileData.Response || !profileData.Response.characters.data) {
+        throw new Error('Profile data not found');
       }
   
+      // Get the most recently played character
       const characters = Object.values(profileData.Response.characters.data) as Array<{ dateLastPlayed: string; characterId: string }>;
-      characters.sort((a, b) => new Date(b.dateLastPlayed).getTime() - new Date(a.dateLastPlayed).getTime());
-      const mostRecentCharacter = characters[0];
-      const currentActivityData = profileData.Response.characterActivities.data[mostRecentCharacter.characterId];
-      const isInSession = currentActivityData.currentActivityHash !== 0 && currentActivityData.dateActivityStarted;
+      const mostRecentCharacter = characters.reduce((latest, character) => {
+        return new Date(character.dateLastPlayed) > new Date(latest.dateLastPlayed) ? character : latest;
+      }, characters[0]);
   
-      // Step 3: Parallelize Current Activity and Recent Activity Fetches
-      const [currentActivityResult, recentActivityResult] = await Promise.all([
-        (async () => {
-          if (isInSession) {
-            const activityResponse = await fetch('/api/activity-definition', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ activityHash: currentActivityData.currentActivityHash }),
-            });
+      if (!mostRecentCharacter || !mostRecentCharacter.characterId) {
+        throw new Error('No characters found for this player');
+      }
   
-            let activityData;
-            try {
-              activityData = await activityResponse.json();
-            } catch {
-              throw new Error('Failed to parse activity definition response');
-            }
+      const { characterId } = mostRecentCharacter;
   
-            let name = activityData.name || 'Unknown Activity';
-            if (activityData.hash === 82913930) {
-              name = 'Orbit';
-            }
+      const currentActivityData =
+        profileData.Response.characterActivities.data[characterId];
+      const isInSession =
+        currentActivityData.currentActivityHash !== 0 &&
+        currentActivityData.dateActivityStarted;
   
-            return {
-              name,
-              startTime: currentActivityData.dateActivityStarted,
-            };
-          } else {
-            return {
-              name: 'No activity in progress',
-              startTime: null,
-            };
-          }
-        })(),
-        (async () => {
-          const activityHistoryResponse = await fetch('/api/recent-activity', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ membershipType, membershipId, characterId: mostRecentCharacter.characterId }),
-          });
+      // Step 3: Fetch Current Activity Details (if in session)
+      let newActivity = { name: 'No activity in progress', startTime: null };
+      if (isInSession) {
+        const activityDefinitionResponse = await fetch('/api/activity-definition', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ activityHash: currentActivityData.currentActivityHash }),
+        });
   
-          let activityHistoryData;
-          try {
-            activityHistoryData = await activityHistoryResponse.json();
-          } catch {
-            throw new Error('Failed to parse recent activity response');
-          }
+        const activityDefinitionData = await activityDefinitionResponse.json();
   
-          if (activityHistoryData.Response.activities && activityHistoryData.Response.activities.length > 0) {
-            const refId = activityHistoryData.Response.activities[0]?.activityDetails.referenceId;
+        newActivity = {
+          name:
+            activityDefinitionData.Response?.displayProperties?.name ||
+            'Unknown Activity',
+          startTime: currentActivityData.dateActivityStarted,
+        };
+      }
+      setCurrentActivity(newActivity);
   
-            const activityDefinitionResponse = await fetch('/api/activity-definition', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ activityHash: refId }),
-            });
+      // Step 4: Fetch Recent Activity
+      const activityHistoryResponse = await fetch('/api/recent-activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ membershipType, membershipId, characterId }),
+      });
+      const activityHistoryData = await activityHistoryResponse.json();
   
-            let activityDefinitionData;
-            try {
-              activityDefinitionData = await activityDefinitionResponse.json();
-            } catch {
-              throw new Error('Failed to parse activity definition response');
-            }
+      if (
+        activityHistoryData.Response &&
+        activityHistoryData.Response.activities?.length > 0
+      ) {
+        const activity = activityHistoryData.Response.activities[0];
+        const refId = activity?.activityDetails.referenceId;
   
-            const name = activityDefinitionData.name || 'Unknown Activity';
-            const modeKey = activityHistoryData.Response.activities[0]?.activityDetails.mode as keyof typeof activityModes;
-            const mode = activityModes[modeKey] || 'Unknown Mode';
+        const activityDefinitionResponse = await fetch('/api/activity-definition', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ activityHash: refId }),
+        });
+        const activityDefinitionData = await activityDefinitionResponse.json();
   
-            const recentDurationSeconds = activityHistoryData.Response.activities[0]?.values.activityDurationSeconds?.basic?.value || 0;
-            const totalMinutes = Math.floor(recentDurationSeconds / 60);
-            const totalSeconds = recentDurationSeconds % 60;
-            const duration = `${totalMinutes}m ${totalSeconds}s`;
+        const mode =
+          activityModes[activity?.activityDetails.mode as keyof typeof activityModes] || 'Unknown Mode';
+        const duration = `${Math.floor(
+          activity?.values.activityDurationSeconds?.basic?.value / 60
+        )}m ${
+          activity?.values.activityDurationSeconds?.basic?.value % 60
+        }s`;
   
-            return {
-              mode,
-              name,
-              duration,
-            };
-          }
-          return null;
-        })(),
-      ]);
-  
-    setCurrentActivity(currentActivityResult);
-    setRecentActivity(recentActivityResult);
+        setRecentActivity({
+          mode,
+          name:
+            activityDefinitionData.Response?.displayProperties?.name ||
+            'Unknown Activity',
+          duration,
+        });
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || 'Failed to fetch activity data');
       } else {
-        setError('An unknown error occurred');
+        setError('Failed to fetch activity data'); // Fallback for non-error objects
+      }
+    } finally {
+      if (isSearch) {
+        setLoading(false); // Turn off loading only for manual search
       }
     }
   };
-
+  
   const handleSearch = async (newBungieName: string) => {
-    setSearchPerformed(false); // Clear previous search state
-    setError(''); // Clear any previous errors
-    setCurrentActivity({ name: null, startTime: null }); // Clear current activity
-    setRecentActivity(null); // Clear recent activity
-
+    setSearchPerformed(true);
+    setBungieName(newBungieName);
+  
     if (fetchIntervalRef.current) {
       clearInterval(fetchIntervalRef.current);
     }
   
-    setSearchPerformed(true); // Trigger loading state
-    await fetchActivityData(newBungieName);
+    fetchActivityData(newBungieName, true); // Pass true to indicate a manual search
   
     fetchIntervalRef.current = setInterval(() => {
-      fetchActivityData(newBungieName);
+      fetchActivityData(newBungieName); // Auto-fetch without showing the loader
     }, REFRESH_INTERVAL_MS);
   };
 
@@ -271,33 +256,33 @@ const HomePage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen gap-4">
       <SearchBar onSearch={handleSearch} />
-      {searchPerformed ? (
-        <>
-          {error && <p className="text-red-500 text-center">{error}</p>}
-          {!currentActivity.name && !recentActivity ? (
-            <LoadingIndicator /> // Show loading indicator while fetching data
-          ) : (
-            <>
-              {currentActivity.startTime ? (
-                <TimerContainer
-                  activityName={currentActivity.name || ''}
-                  startTime={currentActivity.startTime}
-                />
-              ) : (
-                <p className="text-center text-gray-500">{currentActivity.name}</p>
-              )}
-              {recentActivity && (
-                <div className="text-center mt-4">
-                  <p className="text-gray-500">Most Recent Activity:</p>
-                  <p className="text-gray-700">
-                    {recentActivity.mode} - {recentActivity.name} ({recentActivity.duration})
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </>
-      ) : null}
+      {loading ? (
+        <LoadingIndicator /> // Show techno wave loader during search
+      ) : (
+        searchPerformed && (
+          <>
+            {error && <p className="text-red-500 text-center">{error}</p>}
+            {currentActivity ? (
+              <>
+                {currentActivity.startTime ? (
+                  <TimerContainer
+                    activityName={currentActivity.name || ''}
+                    startTime={currentActivity.startTime}
+                    bungieName={bungieName}
+                  />
+                ) : (
+                  <p className="text-center text-gray-500">{currentActivity.name}</p>
+                )}
+                {recentActivity && (
+                  <ActivityContainer recentActivity={recentActivity} />
+                )}
+              </>
+            ) : (
+              <p className="text-center text-gray-500">No activity data available.</p>
+            )}
+          </>
+        )
+      )}
     </div>
   );
 };

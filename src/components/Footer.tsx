@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full bg-gray-900/80 p-4 text-center text-gray-400">
+    <footer className="bg-gray-900 text-gray-400 p-4 text-center">
       Made with ❤️ by belly
     </footer>
   );

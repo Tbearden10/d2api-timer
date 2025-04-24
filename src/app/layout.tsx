@@ -1,16 +1,21 @@
-import Footer from "../components/Footer";
+import React from "react";
+import "./globals.css";
 
 export const metadata = {
-  title: 'Bungie API Integration',
-  description: 'A simple Bungie API integration app using Next.js App Router',
+  title: "Bungie API Integration",
+  description: "A simple Bungie API integration app using Next.js App Router",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen">
-        <main className="flex-grow">{children}</main>
-        <Footer />
+      <body>
+        <main>
+          {children}
+        </main>
+        <footer>
+          Made with ❤️ by belly
+        </footer>
       </body>
     </html>
   );

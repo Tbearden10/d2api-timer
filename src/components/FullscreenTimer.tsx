@@ -1,19 +1,20 @@
 import React from "react";
 import Timer from "./Timer";
 
-interface TimerContainerProps {
+interface FullscreenTimerProps {
   activityName: string;
   startTime: string | null;
   bungieName: string;
 }
 
-const TimerContainer: React.FC<TimerContainerProps> = ({
+const FullscreenTimer: React.FC<FullscreenTimerProps> = ({
   activityName,
   startTime,
   bungieName,
 }) => {
   return (
     <div>
+      <h1 className="text-2xl font-bold mb-4">{bungieName}</h1>
       <Timer
         startTime={startTime}
         activityName={activityName}
@@ -23,4 +24,4 @@ const TimerContainer: React.FC<TimerContainerProps> = ({
   );
 };
 
-export default TimerContainer;
+export default FullscreenTimer;

@@ -5,14 +5,11 @@ export async function POST(req: NextRequest) {
   try {
     const { membershipType, membershipId } = await req.json();
 
-    // Validate input
     if (!membershipType || !membershipId) {
-      if (!membershipType || !membershipId) {
-        return NextResponse.json({ error: 'Missing membershipType or membershipId' }, { status: 400 });
-      }
+      return NextResponse.json({ error: 'Missing membershipType or membershipId' }, { status: 400 });
     }
 
-    // Fetch current activity and transitory data from Bungie API
+    // Fetch from Bungie API
     const result = await fetchBungieData(
       `/Destiny2/${membershipType}/Profile/${membershipId}?components=200,204`,
       'GET'
@@ -22,14 +19,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No current activity found' }, { status: 404 });
     }
 
-    const rawResult = { Response: result.Response };
-    return NextResponse.json(rawResult);
+    return NextResponse.json({ Response: result.Response }, {
+      headers: {
+        'Cache-Control': 'no-store', // Do not cache because data changes frequently
+      },
+    });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-};

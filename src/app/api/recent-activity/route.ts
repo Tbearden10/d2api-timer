@@ -12,21 +12,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Construct the Bungie API URL
-    const url = `/Destiny2/${membershipType}/Account/${membershipId}/Character/${characterId}/Stats/Activities/?count=2`;
+    // Fetch from Bungie API
+    const result = await fetchBungieData(
+      `/Destiny2/${membershipType}/Account/${membershipId}/Character/${characterId}/Stats/Activities/?count=2`,
+      'GET'
+    );
 
-    // Fetch data from Bungie API
-    const result = await fetchBungieData(url, 'GET');
-
-    // Return the raw response from Bungie API
-    return NextResponse.json({ Response: result.Response });
+    return NextResponse.json({ Response: result.Response }, {
+      headers: {
+        'Cache-Control': 'no-store', // Do not cache because data changes frequently
+      },
+    });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
     console.error('API Error:', error);
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-};
