@@ -11,6 +11,7 @@ const BackgroundCanvas = () => {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ alpha: true }); // Transparent background
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio); // Ensure proper scaling on high-DPI screens
     if (canvasRef.current) {
       canvasRef.current.appendChild(renderer.domElement);
     }
@@ -80,7 +81,7 @@ const BackgroundCanvas = () => {
     };
   }, []);
 
-  return <div ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", zIndex: -1 }} />;
+  return <div ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100vh", zIndex: -1 }} />;
 };
 
 export default BackgroundCanvas;
