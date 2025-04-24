@@ -7,6 +7,16 @@ import ActivityContainer from '@/components/ActivityContainer';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorContainer from '@/components/ErrorContainer';
 
+interface User {
+  destinyMemberships: Array<{
+    membershipId: string;
+    membershipType: string;
+    iconPath?: string;
+  }>;
+  bungieGlobalDisplayName: string;
+  bungieGlobalDisplayNameCode: number;
+}
+
 const activityModes = { 
   "0": "None",
   "2": "Story",
@@ -107,16 +117,13 @@ const HomePage: React.FC = () => {
   const [error, setError] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [loading, setLoading] = useState(false); // Track loading state
-
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchActivityData = async (bungieName: string, isSearch: boolean = false) => {
     try {
-      if (isSearch) {
-        setLoading(true); // Set loading to true only for manual search
-      }
+      if (isSearch) setLoading(true);
   
-      setError(''); // Clear any previous error before starting a new fetch
+      setError(''); // Clear previous errors
   
       // Step 1: Resolve Bungie ID
       const searchResponse = await fetch('/api/bungie', {
@@ -126,11 +133,47 @@ const HomePage: React.FC = () => {
       });
       const searchData = await searchResponse.json();
   
-      if (!searchData.Response || searchData.Response.length === 0) {
-        throw new Error('Player not found');
-      }
+      let membershipId = '';
+      let membershipType = '';
   
-      const { membershipId, membershipType } = searchData.Response[0];
+      if (!searchData.Response || searchData.Response.length === 0) {
+        const [prefix, code] = bungieName.split('#');
+        const backupSearchResponse = await fetch('/api/backup-search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prefix }),
+        });
+        const backupSearchData = await backupSearchResponse.json();
+    
+        const userArray = Object.values(backupSearchData.Response?.searchResults || {}) as User[];
+      
+        const mappedResults = userArray.map((user: User) => ({
+          membershipId: user.destinyMemberships[0]?.membershipId,
+          membershipType: user.destinyMemberships[0]?.membershipType,
+          displayName: user.bungieGlobalDisplayName,
+          displayNameCode: user.bungieGlobalDisplayNameCode,
+          iconPath: user.destinyMemberships[0]?.iconPath,
+        }));
+      
+        // Check if the user with the matching code exists in the results
+        const selectedUser = mappedResults.find((user) => {
+          const userCode = user.displayNameCode.toString(); // Convert to string for comparison
+          return userCode === code;
+        });
+
+        // select name id, 
+        membershipId = selectedUser?.membershipId || '';
+        membershipType = selectedUser?.membershipType || '';
+      } else {
+        membershipId = searchData.Response[0]?.membershipId || '';
+        membershipType = searchData.Response[0]?.membershipType || '';
+      }
+
+      
+
+      if (!membershipId || !membershipType) {
+        throw new Error('Unable to resolve Bungie ID');
+      }
   
       // Step 2: Fetch Profile Data
       const profileResponse = await fetch('/api/current-activity', {
@@ -140,30 +183,27 @@ const HomePage: React.FC = () => {
       });
       const profileData = await profileResponse.json();
   
-      if (!profileData.Response || !profileData.Response.characters.data) {
+      if (!profileData.Response || !profileData.Response.characters?.data) {
         throw new Error('Profile data not found');
       }
   
-      // Get the most recently played character
-      const characters = Object.values(profileData.Response.characters.data) as Array<{ dateLastPlayed: string; characterId: string }>;
-      const mostRecentCharacter = characters.reduce((latest, character) => {
-        return new Date(character.dateLastPlayed) > new Date(latest.dateLastPlayed) ? character : latest;
-      }, characters[0]);
+      const characters = Object.values(profileData.Response.characters.data) as Array<{
+        dateLastPlayed: string;
+        characterId: string;
+      }>;
+      const mostRecentCharacter = characters.reduce((latest, character) =>
+        new Date(character.dateLastPlayed) > new Date(latest.dateLastPlayed) ? character : latest
+      );
   
-      if (!mostRecentCharacter || !mostRecentCharacter.characterId) {
+      if (!mostRecentCharacter?.characterId) {
         throw new Error('No characters found for this player');
       }
   
       const { characterId } = mostRecentCharacter;
-  
-      const currentActivityData =
-        profileData.Response.characterActivities.data[characterId];
+      const currentActivityData = profileData.Response.characterActivities.data[characterId];
       const isInSession =
-        currentActivityData.currentActivityHash !== 0 &&
-        currentActivityData.dateActivityStarted;
+        currentActivityData.currentActivityHash !== 0 && currentActivityData.dateActivityStarted;
   
-      // Step 3: Fetch Current Activity Details (if in session)
-      // Step 3: Fetch Current Activity Details (if in session)
       let newActivity = { name: 'Not in Activity', startTime: null };
       if (isInSession) {
         const activityDefinitionResponse = await fetch('/api/activity-definition', {
@@ -171,20 +211,16 @@ const HomePage: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ activityHash: currentActivityData.currentActivityHash }),
         });
-
         const activityDefinitionData = await activityDefinitionResponse.json();
-
+  
         newActivity = {
-          name:
-            activityDefinitionData.Response?.displayProperties?.name ||
-            'Unknown Activity',
+          name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
           startTime: currentActivityData.dateActivityStarted,
         };
-
-        // Treat "Orbit" as "Not in Activity"
+  
         if (currentActivityData.currentActivityHash === 82913930) {
           newActivity.name = 'Not in Activity';
-          newActivity.startTime = null; // Ensure the timer is reset to 0
+          newActivity.startTime = null;
         }
       }
       setCurrentActivity(newActivity);
@@ -197,12 +233,9 @@ const HomePage: React.FC = () => {
       });
       const activityHistoryData = await activityHistoryResponse.json();
   
-      if (
-        activityHistoryData.Response &&
-        activityHistoryData.Response.activities?.length > 0
-      ) {
+      if (activityHistoryData.Response?.activities?.length > 0) {
         const activity = activityHistoryData.Response.activities[0];
-        const refId = activity?.activityDetails.referenceId;
+        const refId = activity.activityDetails.referenceId;
   
         const activityDefinitionResponse = await fetch('/api/activity-definition', {
           method: 'POST',
@@ -212,36 +245,23 @@ const HomePage: React.FC = () => {
         const activityDefinitionData = await activityDefinitionResponse.json();
   
         const mode =
-          activityModes[activity?.activityDetails.mode as keyof typeof activityModes] || 'Unknown Mode';
-        const duration = `${Math.floor(
-          activity?.values.activityDurationSeconds?.basic?.value / 60
-        )}m ${
-          activity?.values.activityDurationSeconds?.basic?.value % 60
+          activityModes[activity.activityDetails.mode as keyof typeof activityModes] || 'Unknown Mode';
+        const duration = `${Math.floor(activity.values.activityDurationSeconds.basic.value / 60)}m ${
+          activity.values.activityDurationSeconds.basic.value % 60
         }s`;
-
-        // get if completed
-
-        const completed = activity?.values.completionReason?.basic?.value === 0 ? true : false;
+        const completed = activity.values.completionReason.basic.value === 0;
   
         setRecentActivity({
           mode,
-          name:
-            activityDefinitionData.Response?.displayProperties?.name ||
-            'Unknown Activity',
+          name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
           duration,
           completed,
         });
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message || 'Failed to fetch activity data');
-      } else {
-        setError('Failed to fetch activity data'); // Fallback for non-error objects
-      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch activity data');
     } finally {
-      if (isSearch) {
-        setLoading(false); // Turn off loading only for manual search
-      }
+      if (isSearch) setLoading(false);
     }
   };
   
