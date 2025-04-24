@@ -50,7 +50,7 @@ const Timer: React.FC<TimerProps> = ({ startTime, activityName, bungieName }) =>
     <div>
       {startTime ? (
         <>
-          <h1>{elapsedTime}</h1>
+          <h1 className="timer">{elapsedTime}</h1>
           <hr className="divider" />
           <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
             <p>{activityName || "Unknown Space"}</p>

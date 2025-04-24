@@ -155,6 +155,19 @@ footer span {
   align-items: center; /* Center-align vertically */
 }
 
+.timer {
+  font-size: 1.5rem; /* Adjust font size */
+  font-weight: bold; /* Make it bold */
+  color: #fff; /* White text */
+  text-align: center; /* Center-align the text */
+  word-wrap: break-word; /* Allow wrapping for long names */
+  overflow-wrap: break-word; /* Ensure wrapping for long words */
+  margin: 10px 0; /* Add spacing above and below */
+  display: flex; /* Use flexbox for alignment */
+  justify-content: center; /* Center-align horizontally */
+  align-items: center; /* Center-align vertically */
+}
+
 .activity-duration {
   color: #4caf50; /* Green for the duration */
 }
