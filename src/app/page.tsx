@@ -5,6 +5,8 @@ import SearchContainer from '@/components/SearchContainer';
 import TimerContainer from '../components/TimerContainer';
 import ActivityContainer from '@/components/ActivityContainer';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import ErrorContainer from '@/components/ErrorContainer';
+
 const activityModes = { 
   "0": "None",
   "2": "Story",
@@ -101,7 +103,7 @@ const HomePage: React.FC = () => {
     name: null,
     startTime: null,
   });
-  const [recentActivity, setRecentActivity] = useState<{ mode: string; name: string; duration: string } | null>(null);
+  const [recentActivity, setRecentActivity] = useState<{ mode: string; name: string; duration: string; completed: boolean } | null>(null);
   const [error, setError] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [loading, setLoading] = useState(false); // Track loading state
@@ -113,6 +115,8 @@ const HomePage: React.FC = () => {
       if (isSearch) {
         setLoading(true); // Set loading to true only for manual search
       }
+  
+      setError(''); // Clear any previous error before starting a new fetch
   
       // Step 1: Resolve Bungie ID
       const searchResponse = await fetch('/api/bungie', {
@@ -175,6 +179,10 @@ const HomePage: React.FC = () => {
             'Unknown Activity',
           startTime: currentActivityData.dateActivityStarted,
         };
+
+        if (currentActivityData.currentActivityHash === 82913930) {
+          newActivity.name = 'Orbit';
+        }
       }
       setCurrentActivity(newActivity);
   
@@ -207,6 +215,10 @@ const HomePage: React.FC = () => {
         )}m ${
           activity?.values.activityDurationSeconds?.basic?.value % 60
         }s`;
+
+        // get if completed
+
+        const completed = activity?.values.completionReason?.basic?.value === 0 ? true : false;
   
         setRecentActivity({
           mode,
@@ -214,6 +226,7 @@ const HomePage: React.FC = () => {
             activityDefinitionData.Response?.displayProperties?.name ||
             'Unknown Activity',
           duration,
+          completed,
         });
       }
     } catch (err: unknown) {
@@ -232,6 +245,8 @@ const HomePage: React.FC = () => {
   const handleSearch = async (newBungieName: string) => {
     setSearchPerformed(true);
     setBungieName(newBungieName);
+  
+    setError(''); // Clear any previous error when starting a new search
   
     if (fetchIntervalRef.current) {
       clearInterval(fetchIntervalRef.current);
@@ -258,20 +273,25 @@ const HomePage: React.FC = () => {
       {loading && <LoadingIndicator />}
       {searchPerformed && !loading && (
         <>
-          {error && <p className="text-red-500 text-center">{error}</p>}
-          {currentActivity.name !== null && (
-            <div className="container">
-              <TimerContainer
-                activityName={currentActivity.name}
-                startTime={currentActivity.startTime}
-                bungieName={bungieName}
-              />
-            </div>
-          )}
-          {recentActivity && (
-            <div className="container">
-              <ActivityContainer recentActivity={recentActivity} />
-            </div>
+          {error ? (
+            <ErrorContainer message={error} /> // Use ErrorContainer for error display
+          ) : (
+            <>
+              {currentActivity.name !== null && (
+                <div>
+                  <TimerContainer
+                    activityName={currentActivity.name}
+                    startTime={currentActivity.startTime}
+                    bungieName={bungieName}
+                  />
+                </div>
+              )}
+              {recentActivity && (
+                <div>
+                  <ActivityContainer recentActivity={recentActivity} />
+                </div>
+              )}
+            </>
           )}
         </>
       )}

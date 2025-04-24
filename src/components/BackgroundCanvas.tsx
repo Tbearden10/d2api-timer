@@ -55,6 +55,15 @@ const BackgroundCanvas = () => {
       shootingStars.push(shootingStar);
     }
 
+    // Handle window resizing
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+
     // Animate the scene
     const animate = () => {
       requestAnimationFrame(animate);
@@ -85,6 +94,7 @@ const BackgroundCanvas = () => {
 
     // Cleanup on unmount
     return () => {
+      window.removeEventListener("resize", handleResize); // Remove resize listener
       renderer.dispose();
       while (scene.children.length > 0) {
         const child = scene.children[0];

@@ -8,7 +8,7 @@ interface SearchContainerProps {
 
 const SearchContainer: React.FC<SearchContainerProps> = ({ onSearch, loading }) => {
   return (
-    <div className="container">
+    <div >
       <SearchBar onSearch={onSearch} loading={loading} />
     </div>
   );

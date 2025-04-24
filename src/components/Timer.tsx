@@ -51,7 +51,7 @@ const Timer: React.FC<TimerProps> = ({ startTime, activityName, bungieName }) =>
       {startTime ? (
         <>
           <h1>{elapsedTime}</h1>
-          <hr style={{ width: "80%", margin: "10px auto", backgroundColor: "#444", height: "1px", border: "none" }} />
+          <hr className="divider" />
           <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
             <p>{activityName || "Unknown Space"}</p>
             <span>|</span>

@@ -61,60 +61,109 @@ footer span {
   box-sizing: border-box;
 }
 
-
-/* Shared container styles */
-.container {
-  width: 100%;
-  max-width: 600px; /* Limit the width for readability */
-  background: #2a2a2a; /* Slightly lighter gray for contrast */
-  border: 1px solid #444; /* Subtle border */
-  border-radius: 5px; /* Slightly rounded corners */
-  padding: 20px;
-  text-align: center; /* Center all text */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  margin: 5px 0; /* Add vertical spacing between containers */
-  animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
-}
-
-/* Activity container styles */
+/* Transparent activity container */
 .activity-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px; /* Add spacing between heading and meta content */
-  padding: 20px;
-  background: #2a2a2a; /* Dark background for contrast */
-  border-radius: 5px; /* Slightly rounded corners */
-  text-align: center;
+  background: transparent; /* Fully transparent background */
+  border: none; /* Remove border */
+  padding: 15px;
+  box-shadow: none; /* Remove shadow */
+}
+/* Transparent timer container */
+.timer-container {
+  background: transparent; /* Fully transparent background */
+  border: none; /* Remove border */
+  padding: 15px;
+  box-shadow: none; /* Remove shadow */
 }
 
+/* Divider styles */
+.divider {
+  width: 80%; /* Adjust width as needed */
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2); /* Subtle transparent white */
+  margin: 10px auto; /* Add spacing around the line */
+  border: none;
+}
+
+/* Meta content styles */
 .meta-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px; /* Add spacing between meta items */
+  gap: 5px; /* Reduced spacing between meta items */
   font-size: 1rem;
   color: #fff; /* White text for readability */
 }
 
-.activity-name {
-  font-weight: bold;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    width: 95%; /* Use more of the screen on smaller devices */
+    padding: 8px; /* Further reduce padding on smaller screens */
+  }
+
+  .activity-container {
+    padding: 15px; /* Further reduce padding on smaller screens */
+  }
+
+  .meta-content {
+    gap: 3px; /* Reduce spacing between meta items on smaller screens */
+    font-size: 0.9rem; /* Slightly smaller font size for better fit */
+  }
+
+  .search-bar {
+    flex-direction: column; /* Stack input and button vertically */
+  }
 }
 
-.activity-mode {
-  font-style: italic;
+.activity-container {
+  font-family: Arial, sans-serif;
+}
+
+.activity-header {
+  display: flex;
+  gap: 8px; /* Space between name, separator, and duration */
+  font-weight: bold;
+  flex-wrap: wrap; /* Ensures wrapping on smaller screens */
+}
+
+
+/* Transparent activity details */
+.activity-name-duration {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.activity-name {
+  color: #fff; /* White for the name */
 }
 
 .activity-duration {
-  color: #00ff00; /* Neon green for duration */
+  color: #4caf50; /* Green for the duration */
 }
 
 .separator {
-  color: #888; /* Subtle gray for the separator */
+  color: #ccc; /* Light gray for the separator */
 }
 
-/* Search bar styles */
+.activity-mode {
+  margin-top: 8px;
+  font-size: 1rem;
+  color: #aaa; /* Light gray for the mode */
+  font-style: italic;
+}
+
+.transparent-container {
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  backdrop-filter: blur(10px); /* Adds a frosted glass effect */
+}
+
+/* Search bar styles with transparency */
 .search-bar {
   display: flex;
   flex-wrap: wrap; /* Allow wrapping if needed */
@@ -122,7 +171,9 @@ footer span {
   justify-content: center; /* Center the content */
   align-items: center; /* Align items vertically */
   width: 100%;
-  animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
+  background: transparent; /* Fully transparent background */
+  border: none; /* Remove border */
+  padding: 10px;
 }
 
 .search-bar input {
@@ -130,27 +181,28 @@ footer span {
   min-width: 200px; /* Ensure the input doesn't shrink too much */
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #444;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
   border-radius: 5px;
   outline: none;
-  background: #1a1a1a;
+  background: rgba(255, 255, 255, 0.1); /* Transparent white background */
   color: #fff;
 }
 
 .search-bar button {
   padding: 10px 20px;
   font-size: 16px;
-  border: 1px solid #444;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
   border-radius: 5px;
-  background: #333;
+  background: rgba(255, 255, 255, 0.1); /* Transparent white background */
   color: #fff;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .search-bar button:hover {
-  background: #444;
+  background: rgba(255, 255, 255, 0.2); /* Slightly less transparent on hover */
 }
+
 
 /* Loading indicator styles */
 .loading-indicator {
@@ -189,11 +241,16 @@ footer span {
   }
 }
 
-.divider {
-  width: 80%; /* Adjust width as needed */
-  height: 1px;
-  background-color: #444; /* Subtle gray color */
-  margin: 10px auto; /* Add spacing around the line */
-  border: none;
+.error-container {
+  background: #ff4d4d; /* Red background for error */
+  color: #fff; /* White text for contrast */
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+  margin: 10px auto;
+  max-width: 600px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
