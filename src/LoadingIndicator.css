@@ -1,0 +1,72 @@
+.loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Full height of the parent container */
+  }
+  
+  .glitch {
+    font-family: 'Press Start 2P', cursive; /* Retro font */
+    font-size: 24px;
+    color: #00ff00;
+    position: relative;
+    text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+    animation: glitch 1s infinite;
+  }
+  
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #ff0000;
+    background: transparent;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: glitch-lines 1.5s infinite linear alternate-reverse;
+  }
+  
+  .glitch::after {
+    color: #0000ff;
+    animation: glitch-lines 1.5s infinite linear alternate-reverse;
+  }
+  
+  @keyframes glitch {
+    0% {
+      transform: translate(0);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      transform: translate(-2px, -2px);
+    }
+    60% {
+      transform: translate(2px, 2px);
+    }
+    80% {
+      transform: translate(2px, -2px);
+    }
+    100% {
+      transform: translate(0);
+    }
+  }
+  
+  @keyframes glitch-lines {
+    0% {
+      clip: rect(0, 900px, 0, 0);
+    }
+    25% {
+      clip: rect(10px, 900px, 20px, 0);
+    }
+    50% {
+      clip: rect(20px, 900px, 40px, 0);
+    }
+    75% {
+      clip: rect(30px, 900px, 60px, 0);
+    }
+    100% {
+      clip: rect(40px, 900px, 80px, 0);
+    }
+  }

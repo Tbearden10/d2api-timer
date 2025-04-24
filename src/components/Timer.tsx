@@ -39,9 +39,17 @@ const Timer: React.FC<TimerProps> = ({ startTime, activityName, bungieName }) =>
 
   return (
     <div>
-      <h1>{elapsedTime}</h1>
-      <p>{activityName || "Activity"}</p>
-      <p>{bungieName}</p>
+      {startTime ? (
+        <>
+          <h1>{elapsedTime}</h1>
+          <p>{activityName || "Activity"}</p>
+          <p>{bungieName}</p>
+        </>
+      ) : (
+        <>
+          <p>It seems like there is no ongoing activity right now.</p>
+        </>
+      )}
     </div>
   );
 };

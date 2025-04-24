@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import SearchBar from '../components/SearchBar';
+import SearchContainer from '@/components/SearchContainer';
 import TimerContainer from '../components/TimerContainer';
-import LoadingIndicator from '../components/LoadingIndicator'; // Import the techno wave loader
 import ActivityContainer from '@/components/ActivityContainer';
-
+import LoadingIndicator from '@/components/LoadingIndicator';
 const activityModes = { 
   "0": "None",
   "2": "Story",
@@ -94,7 +93,7 @@ const activityModes = {
   "92": "Relic"
 }
 
-const REFRESH_INTERVAL_MS = 10000; // Auto-fetch every 30 seconds
+const REFRESH_INTERVAL_MS = 30000; // Auto-fetch every 30 seconds
 
 const HomePage: React.FC = () => {
   const [bungieName, setBungieName] = useState('');
@@ -254,34 +253,27 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen gap-4">
-      <SearchBar onSearch={handleSearch} />
-      {loading ? (
-        <LoadingIndicator /> // Show techno wave loader during search
-      ) : (
-        searchPerformed && (
-          <>
-            {error && <p className="text-red-500 text-center">{error}</p>}
-            {currentActivity ? (
-              <>
-                {currentActivity.startTime ? (
-                  <TimerContainer
-                    activityName={currentActivity.name || ''}
-                    startTime={currentActivity.startTime}
-                    bungieName={bungieName}
-                  />
-                ) : (
-                  <p className="text-center text-gray-500">{currentActivity.name}</p>
-                )}
-                {recentActivity && (
-                  <ActivityContainer recentActivity={recentActivity} />
-                )}
-              </>
-            ) : (
-              <p className="text-center text-gray-500">No activity data available.</p>
-            )}
-          </>
-        )
+    <div className="page-container">
+      <SearchContainer onSearch={handleSearch} loading={loading} />
+      {loading && <LoadingIndicator />}
+      {searchPerformed && !loading && (
+        <>
+          {error && <p className="text-red-500 text-center">{error}</p>}
+          {currentActivity.name !== null && (
+            <div className="container">
+              <TimerContainer
+                activityName={currentActivity.name}
+                startTime={currentActivity.startTime}
+                bungieName={bungieName}
+              />
+            </div>
+          )}
+          {recentActivity && (
+            <div className="container">
+              <ActivityContainer recentActivity={recentActivity} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -10,10 +10,11 @@ const ActivityContainer: React.FC<ActivityContainerProps> = ({ recentActivity })
   }
 
   return (
-    <div>
-      <div>{recentActivity.mode}</div>
-      <div>{recentActivity.name}</div>
-      <div>{recentActivity.duration}</div>
+    <div className="activity-container">
+      <h1>Recent Activity</h1>
+      <p>Mode: {recentActivity.mode}</p>
+      <p>Name: {recentActivity.name}</p>
+      <p>Duration: {recentActivity.duration}</p>
     </div>
   );
 };

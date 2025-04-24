@@ -13,7 +13,7 @@ const TimerContainer: React.FC<TimerContainerProps> = ({
   bungieName,
 }) => {
   return (
-    <div>
+    <div className="timer-container">
       <Timer
         startTime={startTime}
         activityName={activityName}

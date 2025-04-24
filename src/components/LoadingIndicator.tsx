@@ -1,15 +1,10 @@
-import React from "react";
+// components/LoadingIndicator.tsx
+import { PacmanLoader } from 'react-spinners';
 
-const LoadingIndicator: React.FC = () => {
+const LoadingIndicator = () => {
   return (
-    <div className="techno-loader-container flex flex-col items-center justify-center">
-      <div className="techno-line-wave flex gap-2">
-        <div className="line"></div>
-        <div className="line"></div>
-        <div className="line"></div>
-        <div className="line"></div>
-        <div className="line"></div>
-      </div>
+    <div className="flex justify-center items-center h-40">
+      <PacmanLoader color="#FE0932" size={40} />
     </div>
   );
 };

@@ -2,9 +2,10 @@ import React, { useState } from "react";
 
 interface SearchBarProps {
   onSearch: (bungieName: string) => void;
+  loading: boolean;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, loading }) => {
   const [bungieName, setBungieName] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -15,14 +16,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="search-bar">
       <input
         type="text"
         value={bungieName}
         onChange={(e) => setBungieName(e.target.value)}
         placeholder="Enter Bungie Name"
       />
-      <button type="submit">Search</button>
+      <button type="submit" disabled={loading}>
+        {loading ? "Searching..." : "Search"}
+      </button>
     </form>
   );
 };

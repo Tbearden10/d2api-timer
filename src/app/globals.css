@@ -5,17 +5,144 @@
   box-sizing: border-box;
 }
 
+/* Ensure the body takes up the full height of the viewport */
 html, body {
   height: 100%;
   width: 100%;
+  font-family: Arial, sans-serif; /* Simple, clean font */
+  background: #1a1a1a; /* Dark gray background for contrast */
+  color: #fff; /* White text for readability */
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column; /* Stack content vertically */
 }
 
-body {
+/* Main content area */
+main {
+  flex: 1; /* Take up remaining space between header and footer */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 20px; /* Even spacing between components */
+  padding: 20px;
+  width: 100%; /* Full width of the page */
+  box-sizing: border-box;
+}
+
+/* Footer styles */
+footer {
+  width: 100%; /* Full width of the page */
+  background: linear-gradient(to right, rgba(26, 26, 26, 0.7), rgba(51, 51, 51, 0.5), rgba(26, 26, 26, 0.7));
+  border-top: 1px solid #444; /* Subtle border for separation */
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+  animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
+}
+
+footer span {
+  font-size: 14px;
+  color: #ccc; /* Light gray text for footer */
+}
+
+/* Page container styles */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center all child components horizontally */
+  gap: 20px; /* Add spacing between child components */
+  padding: 20px;
+  width: 100%; /* Full width of the page */
+  box-sizing: border-box;
+}
+
+/* Shared container styles */
+.container {
+  width: 100%;
+  max-width: 600px; /* Limit the width for readability */
+  background: #2a2a2a; /* Slightly lighter gray for contrast */
+  border: 1px solid #444; /* Subtle border */
+  border-radius: 5px; /* Slightly rounded corners */
+  padding: 20px;
+  text-align: center; /* Center all text */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  margin: 5px 0; /* Add vertical spacing between containers */
+  animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
+}
+
+/* Search bar styles */
+.search-bar {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping if needed */
+  gap: 10px; /* Add spacing between input and button */
+  justify-content: center; /* Center the content */
+  align-items: center; /* Align items vertically */
+  width: 100%;
+  animation: flyUpFadeIn 0.8s ease-in-out; /* Add animation */
+}
+
+.search-bar input {
+  flex: 1; /* Allow the input to take up available space */
+  min-width: 200px; /* Ensure the input doesn't shrink too much */
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  outline: none;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.search-bar button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.search-bar button:hover {
+  background: #444;
+}
+
+/* Loading indicator styles */
+.loading-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a; /* Dark background */
+  z-index: 9999; /* Ensure it appears above all other content */
+}
+
+/* Keyframes for flying-up and fade-in animation */
+@keyframes flyUpFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px); /* Start slightly below */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* End at the original position */
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    width: 95%; /* Use more of the screen on smaller devices */
+  }
+
+  .search-bar {
+    flex-direction: column; /* Stack input and button vertically */
+  }
 }
