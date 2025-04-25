@@ -117,12 +117,16 @@ const activityModes = {
 const REFRESH_INTERVAL_MS = 30000; // Auto-fetch every 30 seconds
 
 const HomePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(0);
+
+
   const [backgroundColor, setBackgroundColor] = useState("#000000"); // Default black
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [effectType, setEffectType] = useState<"stars" | "snow">("stars");
   const [showController, setShowController] = useState(false);
   const controllerRef = useRef<HTMLDivElement | null>(null);
+
+
+  const [activeTab, setActiveTab] = useState(0);
   const [bungieName, setBungieName] = useState('');
   const [currentActivity, setCurrentActivity] = useState<{ name: string | null; startTime: string | null }>({
     name: null,
@@ -318,6 +322,30 @@ const HomePage: React.FC = () => {
       }
     };
   }, []);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const savedBackgroundColor = localStorage.getItem("backgroundColor");
+    const savedEffectsEnabled = localStorage.getItem("effectsEnabled");
+    const savedEffectType = localStorage.getItem("effectType");
+
+    if (savedBackgroundColor) setBackgroundColor(savedBackgroundColor);
+    if (savedEffectsEnabled) setEffectsEnabled(savedEffectsEnabled === "true");
+    if (savedEffectType) setEffectType(savedEffectType as "stars" | "snow");
+  }, []);
+
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("backgroundColor", backgroundColor);
+  }, [backgroundColor]);
+
+  useEffect(() => {
+    localStorage.setItem("effectsEnabled", effectsEnabled.toString());
+  }, [effectsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("effectType", effectType);
+  }, [effectType]);
 
   // Close the modal when clicking outside
   useEffect(() => {

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface BackgroundControllerProps {
   backgroundColor: string;
@@ -18,18 +18,41 @@ const BackgroundController: React.FC<BackgroundControllerProps> = ({
   effectType,
   setEffectType,
 }) => {
+  // Load preferences from localStorage on mount
+  useEffect(() => {
+    const savedBackgroundColor = localStorage.getItem("backgroundColor");
+    const savedEffectsEnabled = localStorage.getItem("effectsEnabled");
+    const savedEffectType = localStorage.getItem("effectType");
+
+    if (savedBackgroundColor !== null) setBackgroundColor(savedBackgroundColor);
+    if (savedEffectsEnabled !== null) setEffectsEnabled(savedEffectsEnabled === "true");
+    if (savedEffectType !== null) setEffectType(savedEffectType as "stars" | "snow");
+  }, [setBackgroundColor, setEffectsEnabled, setEffectType]);
+
+  // Save preferences to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("backgroundColor", backgroundColor);
+  }, [backgroundColor]);
+
+  useEffect(() => {
+    localStorage.setItem("effectsEnabled", effectsEnabled.toString());
+  }, [effectsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("effectType", effectType);
+  }, [effectType]);
+
   return (
     <div>
       {/* Background Color Selector */}
       <div style={{ marginBottom: "20px" }}>
         <label htmlFor="background-color">Background Color: </label>
         <input
-            type="color"
-            id="background-color"
-            value={backgroundColor}
-            onInput={(e) => setBackgroundColor((e.target as HTMLInputElement).value)}
-            />
-
+          type="color"
+          id="background-color"
+          value={backgroundColor}
+          onInput={(e) => setBackgroundColor((e.target as HTMLInputElement).value)}
+        />
       </div>
 
       {/* Toggle Effects */}

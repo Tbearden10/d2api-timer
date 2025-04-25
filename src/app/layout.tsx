@@ -1,17 +1,11 @@
 "use client";
 
 import "./globals.css";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import Footer from "../components/Footer";
 import BackgroundCanvas from "../components/BackgroundCanvas";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    // Generate a random color
-    const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-    document.body.style.backgroundColor = `#${randomColor.padStart(6, "0")}`;
-  }, []);
-
   return (
     <html lang="en">
       <head>
