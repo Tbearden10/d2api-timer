@@ -2,151 +2,207 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-const BackgroundCanvas = () => {
-  const canvasRef = useRef<HTMLDivElement>(null);
+interface BackgroundCanvasProps {
+  backgroundColor?: string;
+  effectsEnabled?: boolean;
+  effectType?: "stars" | "snow";
+}
 
+const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
+  backgroundColor = "#000000",
+  effectsEnabled = true,
+  effectType = "stars",
+}) => {
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const effectRef = useRef<THREE.Points | null>(null);
+  const currentEffectType = useRef(effectType);
+  const backgroundColorRef = useRef<string>(backgroundColor);
+
+  // Initial setup: scene, camera, renderer
   useEffect(() => {
-    // Create scene, camera, and renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true }); // Transparent background
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio); // Ensure proper scaling on high-DPI screens
+    renderer.setPixelRatio(window.devicePixelRatio);
+
     if (canvasRef.current) {
       canvasRef.current.appendChild(renderer.domElement);
     }
 
-    // Generate random HSL colors for the background gradient
-    const randomHSL = () => `hsl(${Math.random() * 360}, ${50 + Math.random() * 50}%, ${30 + Math.random() * 40}%)`;
-    const color1 = new THREE.Color(randomHSL());
-    const color2 = new THREE.Color(randomHSL());
-    scene.background = color1.clone().lerp(color2, 0.5);
+    sceneRef.current = scene;
+    rendererRef.current = renderer;
+    cameraRef.current = camera;
 
-    // Particle system setup (stars)
-    const particleGeometry = new THREE.BufferGeometry();
-    const starMaterial = new THREE.PointsMaterial({
-      size: 3,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending, // Glowing effect
-    });
-
-    const positions: number[] = [];
-    const colors: number[] = [];
-
-    const generateStars = () => {
-      const particleCount = 3000; // Increased number of particles
-      for (let i = 0; i < particleCount; i++) {
-        // Random positions for stars
-        positions.push(
-          Math.random() * 4000 - 2000, // X position
-          Math.random() * 4000 - 2000, // Y position
-          Math.random() * 4000 - 2000 // Z position
-        );
-        // Fully randomized star colors using HSL
-        const starColor = new THREE.Color(randomHSL());
-        colors.push(starColor.r, starColor.g, starColor.b);
-      }
-    };
-
-    const generateComets = () => {
-      const geometry = new THREE.BufferGeometry();
-      const cometCount = 20;
-      const cometPositions = [];
-      const cometColors = [];
-
-      for (let i = 0; i < cometCount; i++) {
-        cometPositions.push(
-          Math.random() * 4000 - 2000,
-          Math.random() * 4000 - 2000,
-          Math.random() * 4000 - 2000
-        );
-        const cometColor = new THREE.Color(randomHSL());
-        cometColors.push(cometColor.r, cometColor.g, cometColor.b);
-      }
-
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(cometPositions, 3));
-      geometry.setAttribute("color", new THREE.Float32BufferAttribute(cometColors, 3));
-
-      const cometMaterial = new THREE.PointsMaterial({
-        size: 12,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.7,
-        blending: THREE.AdditiveBlending, // Glowing effect
-      });
-
-      const comets = new THREE.Points(geometry, cometMaterial);
-      scene.add(comets);
-
-      return { geometry, points: comets };
-    };
-
-    generateStars();
-
-    particleGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    particleGeometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-
-    const stars = new THREE.Points(particleGeometry, starMaterial);
-    scene.add(stars);
-
-    const { geometry: cometGeo } = generateComets();
-
-    // Handle window resizing
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    // Animate the particles
+    // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // Rotate the star system
-      stars.rotation.x += 0.0004;
-      stars.rotation.y += 0.0004;
+      const scene = sceneRef.current;
+      const effect = effectRef.current;
 
-      // Animate comets
-      const cometPos = cometGeo.attributes.position.array;
-      for (let i = 0; i < cometPos.length; i += 3) {
-        cometPos[i] += 6; // X
-        cometPos[i + 1] += 2; // Y
-        if (cometPos[i] > 2000 || cometPos[i + 1] > 2000) {
-          cometPos[i] = -2000 + Math.random() * 100;
-          cometPos[i + 1] = -2000 + Math.random() * 100;
+      if (!scene || !renderer || !cameraRef.current) return;
+
+      // Update background only when color actually changes
+      if ((scene.background as THREE.Color)?.getHexString() !== new THREE.Color(backgroundColorRef.current).getHexString()) {
+        scene.background = new THREE.Color(backgroundColorRef.current);
+      }
+
+      if (effect) {
+        if (currentEffectType.current === "snow") {
+          const positions = effect.geometry.attributes.position as THREE.BufferAttribute;
+          const array = positions.array as Float32Array;
+
+          for (let i = 0; i < array.length; i += 3) {
+            array[i + 1] -= 1.0; // Fall
+            array[i] += Math.sin(array[i + 1] * 0.01) * 0.2; // Wind drift
+
+            if (array[i + 1] < -2000) {
+              array[i + 1] = 2000;
+              array[i] = Math.random() * 4000 - 2000;
+              array[i + 2] = Math.random() * 4000 - 2000;
+            }
+          }
+
+          positions.needsUpdate = true;
+        } else {
+          effect.rotation.y += 0.001; // Rotate stars
         }
       }
-      cometGeo.attributes.position.needsUpdate = true;
 
-      renderer.render(scene, camera);
+      renderer.render(scene, cameraRef.current);
     };
 
     animate();
 
-    // Cleanup on unmount
+    const handleResize = () => {
+      if (cameraRef.current && rendererRef.current) {
+        const camera = cameraRef.current;
+        const renderer = rendererRef.current;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
       window.removeEventListener("resize", handleResize);
       renderer.dispose();
-      while (scene.children.length > 0) {
-        const child = scene.children[0];
-        if (child instanceof THREE.Mesh) {
-          if (child.geometry) child.geometry.dispose();
-          if (Array.isArray(child.material)) {
-            child.material.forEach((mat) => mat.dispose());
-          } else if (child.material) {
-            child.material.dispose();
-          }
-        }
-        scene.remove(child);
-      }
     };
   }, []);
 
-  return <div ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100vh", zIndex: -1 }} />;
+  // Track backgroundColor with ref (for animation loop throttling)
+  useEffect(() => {
+    backgroundColorRef.current = backgroundColor;
+  }, [backgroundColor]);
+
+  // Update effects (stars/snow toggle)
+  useEffect(() => {
+    const scene = sceneRef.current;
+    currentEffectType.current = effectType;
+
+    if (!scene) return;
+
+    // Remove existing effect
+    if (effectRef.current) {
+      scene.remove(effectRef.current);
+      effectRef.current.geometry.dispose();
+      if (Array.isArray(effectRef.current.material)) {
+        effectRef.current.material.forEach((mat) => mat.dispose());
+      } else {
+        effectRef.current.material.dispose();
+      }
+      effectRef.current = null;
+    }
+
+    if (!effectsEnabled) return;
+
+    let geometry: THREE.BufferGeometry;
+    let material: THREE.PointsMaterial;
+    let points: THREE.Points;
+
+    if (effectType === "stars") {
+      geometry = new THREE.BufferGeometry();
+      const positions: number[] = [];
+      const colors: number[] = [];
+
+      const randomHSL = () => `hsl(${Math.random() * 360}, 70%, 50%)`;
+
+      for (let i = 0; i < 3000; i++) {
+        positions.push(
+          Math.random() * 4000 - 2000,
+          Math.random() * 4000 - 2000,
+          Math.random() * 4000 - 2000
+        );
+        const color = new THREE.Color(randomHSL());
+        colors.push(color.r, color.g, color.b);
+      }
+
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+
+      material = new THREE.PointsMaterial({
+        size: 3,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+      });
+
+      points = new THREE.Points(geometry, material);
+    } else {
+      geometry = new THREE.BufferGeometry();
+      const positions: number[] = [];
+
+      for (let i = 0; i < 1000; i++) {
+        positions.push(
+          Math.random() * 4000 - 2000,
+          Math.random() * 4000 - 2000,
+          Math.random() * 4000 - 2000
+        );
+      }
+
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+
+      material = new THREE.PointsMaterial({
+        size: 5,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8,
+      });
+
+      points = new THREE.Points(geometry, material);
+    }
+
+    effectRef.current = points;
+    scene.add(points);
+  }, [effectsEnabled, effectType]);
+
+  return (
+    <div
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100vh",
+        zIndex: -1,
+      }}
+    />
+  );
 };
 
 export default BackgroundCanvas;

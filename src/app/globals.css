@@ -268,3 +268,43 @@ main {
 .activity {
   animation: fadeIn 0.8s ease-in-out;
 }
+
+.activity-cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.character-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.character-tabs button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.character-tabs img {
+  width: 50px;
+  height: 50px;
+  filter: invert(1); /* Make black SVG white */
+}
+
+.character-tabs button div {
+  margin-top: 5px;
+  height: 2px;
+  width: 50px;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+}
+
+.character-tabs button.active div {
+  background-color: white; /* Underline for active tab */
+}

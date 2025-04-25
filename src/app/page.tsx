@@ -6,6 +6,9 @@ import TimerContainer from '../components/TimerContainer';
 import ActivityContainer from '@/components/ActivityContainer';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorContainer from '@/components/ErrorContainer';
+import BackgroundController from '@/components/BackgroundController';
+import BackgroundCanvas from '@/components/BackgroundCanvas';
+import GearButton from '@/components/GearButton';
 
 interface User {
   destinyMemberships: Array<{
@@ -16,6 +19,12 @@ interface User {
   bungieGlobalDisplayName: string;
   bungieGlobalDisplayNameCode: number;
 }
+
+const characters = [
+  { characterClass: "Titan", characterId: "123" },
+  { characterClass: "Hunter", characterId: "456" },
+  { characterClass: "Warlock", characterId: "789" },
+];
 
 const activityModes = { 
   "0": "None",
@@ -108,12 +117,18 @@ const activityModes = {
 const REFRESH_INTERVAL_MS = 30000; // Auto-fetch every 30 seconds
 
 const HomePage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [backgroundColor, setBackgroundColor] = useState("#000000"); // Default black
+  const [effectsEnabled, setEffectsEnabled] = useState(true);
+  const [effectType, setEffectType] = useState<"stars" | "snow">("stars");
+  const [showController, setShowController] = useState(false);
+  const controllerRef = useRef<HTMLDivElement | null>(null);
   const [bungieName, setBungieName] = useState('');
   const [currentActivity, setCurrentActivity] = useState<{ name: string | null; startTime: string | null }>({
     name: null,
     startTime: null,
   });
-  const [recentActivity, setRecentActivity] = useState<{ mode: string; name: string; duration: string; completed: boolean; pgcrImage: string } | null>(null);
+  const [recentActivity, setRecentActivity] = useState<Array<{ mode: string; name: string; duration: string; completed: boolean; pgcrImage?: string; classType: number; characterId: string }>>([]);
   const [error, setError] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [loading, setLoading] = useState(false); // Track loading state
@@ -190,7 +205,11 @@ const HomePage: React.FC = () => {
       const characters = Object.values(profileData.Response.characters.data) as Array<{
         dateLastPlayed: string;
         characterId: string;
+        classType: number;
       }>;
+
+      console.log('Characters:', characters); // Debugging line
+      
       const mostRecentCharacter = characters.reduce((latest, character) =>
         new Date(character.dateLastPlayed) > new Date(latest.dateLastPlayed) ? character : latest
       );
@@ -224,41 +243,50 @@ const HomePage: React.FC = () => {
         }
       }
       setCurrentActivity(newActivity);
-  
-      // Step 4: Fetch Recent Activity
-      const activityHistoryResponse = await fetch('/api/recent-activity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ membershipType, membershipId, characterId }),
-      });
-      const activityHistoryData = await activityHistoryResponse.json();
-  
-      if (activityHistoryData.Response?.activities?.length > 0) {
-        const activity = activityHistoryData.Response.activities[0];
-        const refId = activity.activityDetails.referenceId;
-  
-        const activityDefinitionResponse = await fetch('/api/activity-definition', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ activityHash: refId }),
-        });
-        const activityDefinitionData = await activityDefinitionResponse.json();
-  
-        const mode =
-          activityModes[activity.activityDetails.mode as keyof typeof activityModes] || 'Unknown Mode';
-        const duration = `${Math.floor(activity.values.activityDurationSeconds.basic.value / 60)}m ${
-          activity.values.activityDurationSeconds.basic.value % 60
-        }s`;
-        const completed = activity.values.completionReason.basic.value === 0;
-  
-        setRecentActivity({
-          mode,
-          name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
-          duration,
-          completed,
-          pgcrImage: activityDefinitionData.Response?.pgcrImage || null,
-        });
-      }
+
+      // NEW STEP 4
+      const recentActivities = await Promise.all(
+        characters.map(async (character) => {
+          const activityHistoryResponse = await fetch('/api/recent-activity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ membershipType, membershipId, characterId: character.characterId }),
+          });
+          const activityHistoryData = await activityHistoryResponse.json();
+          
+          if (activityHistoryData.Response?.activities?.length > 0) {
+            const activity = activityHistoryData.Response.activities[0]; // Most recent activity
+            const refId = activity.activityDetails.referenceId;
+      
+            const activityDefinitionResponse = await fetch('/api/activity-definition', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ activityHash: refId }),
+            });
+            const activityDefinitionData = await activityDefinitionResponse.json();
+      
+            const mode =
+              activityModes[activity.activityDetails.mode as keyof typeof activityModes] || 'Unknown Mode';
+            const duration = `${Math.floor(activity.values.activityDurationSeconds.basic.value / 60)}m ${
+              activity.values.activityDurationSeconds.basic.value % 60
+            }s`;
+            const completed = activity.values.completionReason.basic.value === 0;
+      
+            return {
+              mode,
+              name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
+              duration,
+              completed,
+              pgcrImage: activityDefinitionData.Response?.pgcrImage || null,
+              classType: character.classType,
+              characterId: character.characterId,
+            };
+          }
+          return null; // No recent activity for this character
+        })
+      );
+
+      setRecentActivity(recentActivities.filter((activity) => activity !== null));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch activity data');
     } finally {
@@ -291,8 +319,67 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
+  // Close the modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        controllerRef.current &&
+        !controllerRef.current.contains(event.target as Node)
+      ) {
+        setShowController(false);
+      }
+    };
+
+    if (showController) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showController]);
+
   return (
     <div className="page-container">
+      {/* Background Canvas */}
+      <BackgroundCanvas
+        backgroundColor={backgroundColor}
+        effectsEnabled={effectsEnabled}
+        effectType={effectType}
+      />
+
+      {/* Gear Icon Button */}
+      <GearButton onClick={() => setShowController((prev) => !prev)} />
+
+      {/* Background Controller Modal */}
+      {showController && (
+        <div
+          ref={controllerRef}
+          style={{
+            position: "fixed",
+            top: "60px",
+            left: "10px",
+            zIndex: 1000,
+            background: "#222",
+            padding: "10px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
+            color: "#fff",
+          }}
+        >
+          <BackgroundController
+            backgroundColor={backgroundColor}
+            setBackgroundColor={setBackgroundColor}
+            effectsEnabled={effectsEnabled}
+            setEffectsEnabled={setEffectsEnabled}
+            effectType={effectType}
+            setEffectType={setEffectType}
+          />
+        </div>
+      )}
+
       <SearchContainer onSearch={handleSearch} loading={loading} />
       {loading && <LoadingIndicator />}
       {searchPerformed && !loading && (
@@ -310,11 +397,64 @@ const HomePage: React.FC = () => {
                   />
                 </div>
               )}
-              {recentActivity && (
-                <div>
-                  <ActivityContainer recentActivity={recentActivity} />
+              <div className="activity-cards">
+                {/* Character Tabs */}
+                <div className="character-tabs" style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+                  {recentActivity.map((activity, index) => {
+                    // Map characterClass to an icon
+                    const characterClassIcons: { [key: string]: string } = {
+                      Titan: "/icons/titan.svg",
+                      Hunter: "/icons/hunter.svg",
+                      Warlock: "/icons/warlock.svg",
+                    };
+
+                    const characterClass = characters[index]?.characterClass || "Unknown";
+                    const iconPath = characterClassIcons[characterClass] || "/icons/default-character.png";
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setActiveTab(index)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "10px", // Increased padding for larger clickable area
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        <img
+                          src={iconPath} // Use the mapped icon
+                          alt={characterClass}
+                          style={{
+                            width: "45px", // Increased width
+                            height: "45px", // Increased height
+                            filter: "invert(1)", // Make black SVG white
+                          }}
+                        />
+                        <div
+                          style={{
+                            marginTop: "8px", // Adjust spacing between icon and underline
+                            height: "3px", // Slightly thicker underline
+                            width: "70px", // Match the width of the icon
+                            backgroundColor: activeTab === index ? "white" : "transparent",
+                            transition: "background-color 0.3s ease",
+                          }}
+                        ></div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+
+                {/* Active Tab Content */}
+                <div style={{ marginTop: "10px" }}> {/* Adjust vertical spacing */}
+                  {recentActivity[activeTab] && (
+                    <ActivityContainer recentActivity={recentActivity[activeTab]} />
+                  )}
+                </div>
+              </div>
             </>
           )}
         </>
