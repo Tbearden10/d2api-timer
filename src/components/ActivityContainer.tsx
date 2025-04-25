@@ -7,6 +7,7 @@ interface ActivityContainerProps {
     name: string;
     duration: string;
     completed: boolean;
+    pgcrImage?: string; // Optional background image URL
   };
 }
 
@@ -18,6 +19,7 @@ const ActivityContainer: React.FC<ActivityContainerProps> = ({ recentActivity })
         activityMode={recentActivity.mode}
         activityDuration={recentActivity.duration}
         completed={recentActivity.completed}
+        pgcrImage={recentActivity.pgcrImage} // Pass the image URL
       />
     </div>
   );

@@ -113,7 +113,7 @@ const HomePage: React.FC = () => {
     name: null,
     startTime: null,
   });
-  const [recentActivity, setRecentActivity] = useState<{ mode: string; name: string; duration: string; completed: boolean } | null>(null);
+  const [recentActivity, setRecentActivity] = useState<{ mode: string; name: string; duration: string; completed: boolean; pgcrImage: string } | null>(null);
   const [error, setError] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [loading, setLoading] = useState(false); // Track loading state
@@ -256,6 +256,7 @@ const HomePage: React.FC = () => {
           name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
           duration,
           completed,
+          pgcrImage: activityDefinitionData.Response?.pgcrImage || null,
         });
       }
     } catch (err) {
