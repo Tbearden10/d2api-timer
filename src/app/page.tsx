@@ -211,9 +211,7 @@ const HomePage: React.FC = () => {
         characterId: string;
         classType: number;
       }>;
-
-      console.log('Characters:', characters); // Debugging line
-      
+  
       const mostRecentCharacter = characters.reduce((latest, character) =>
         new Date(character.dateLastPlayed) > new Date(latest.dateLastPlayed) ? character : latest
       );
@@ -248,6 +246,9 @@ const HomePage: React.FC = () => {
       }
       setCurrentActivity(newActivity);
 
+      // sort characters by classtype
+      characters.sort((a, b) => a.classType - b.classType);
+
       // NEW STEP 4
       const recentActivities = await Promise.all(
         characters.map(async (character) => {
@@ -257,7 +258,7 @@ const HomePage: React.FC = () => {
             body: JSON.stringify({ membershipType, membershipId, characterId: character.characterId }),
           });
           const activityHistoryData = await activityHistoryResponse.json();
-          
+       
           if (activityHistoryData.Response?.activities?.length > 0) {
             const activity = activityHistoryData.Response.activities[0]; // Most recent activity
             const refId = activity.activityDetails.referenceId;
@@ -429,6 +430,9 @@ const HomePage: React.FC = () => {
                 {/* Character Tabs */}
                 <div className="character-tabs" style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
                   {recentActivity.map((activity, index) => {
+
+
+
                     // Map characterClass to an icon
                     const characterClassIcons: { [key: string]: string } = {
                       Titan: "/icons/titan.svg",
