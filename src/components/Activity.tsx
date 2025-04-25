@@ -4,6 +4,7 @@ interface ActivityProps {
   activityName: string;
   activityMode: string;
   activityDuration: string;
+  activityDate: Date; // Add date property
   completed: boolean;
   pgcrImage?: string; // Optional background image URL
 }
@@ -12,9 +13,13 @@ const Activity: React.FC<ActivityProps> = ({
   activityName,
   activityMode,
   activityDuration,
+  activityDate,
   completed,
   pgcrImage,
 }) => {
+  // Helper function to format duration
+  console.log("Activity Duration:", activityDuration); // Log the duration for debugging
+
   return (
     <div
       className="activity"
@@ -67,8 +72,14 @@ const Activity: React.FC<ActivityProps> = ({
         <div style={{ display: "flex", gap: "5px", fontSize: "1rem" }}>
           <p>{activityMode}</p>
           <span>|</span>
-          <p style={{ color: completed ? "#4caf50" : "#f44336" }}>{activityDuration}</p>
+          <p style={{ color: completed ? "#4caf50" : "#f44336" }}>
+            {activityDuration}
+          </p>
         </div>
+        {/* Add Date */}
+        <p style={{ marginTop: "8px", fontSize: "0.9rem", color: "#ccc" }}>
+          {activityDate.toLocaleString()} {/* Format the date */}
+        </p>
       </div>
     </div>
   );

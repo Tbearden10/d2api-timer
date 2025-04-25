@@ -132,7 +132,15 @@ const HomePage: React.FC = () => {
     name: null,
     startTime: null,
   });
-  const [recentActivity, setRecentActivity] = useState<Array<{ mode: string; name: string; duration: string; completed: boolean; pgcrImage?: string; classType: number; characterId: string }>>([]);
+  const [recentActivity, setRecentActivity] = useState<Array<{ 
+    mode: string; 
+    name: string; 
+    duration: string; 
+    date: Date;
+    completed: boolean; 
+    pgcrImage?: string; 
+    classType: number; 
+    characterId: string; }>>([]);
   const [error, setError] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [loading, setLoading] = useState(false); // Track loading state
@@ -272,15 +280,47 @@ const HomePage: React.FC = () => {
       
             const mode =
               activityModes[activity.activityDetails.mode as keyof typeof activityModes] || 'Unknown Mode';
-            const duration = `${Math.floor(activity.values.activityDurationSeconds.basic.value / 60)}m ${
-              activity.values.activityDurationSeconds.basic.value % 60
-            }s`;
+
+              const duration = (() => {
+                const totalSeconds = activity.values.activityDurationSeconds.basic.value;
+                const days = Math.floor(totalSeconds / 86400); // Calculate days
+                const hours = Math.floor((totalSeconds % 86400) / 3600); // Calculate hours after days
+                const minutes = Math.floor((totalSeconds % 3600) / 60); // Calculate minutes after hours
+                const seconds = Math.floor(totalSeconds % 60); // Calculate remaining seconds
+                const milliseconds = Math.floor(totalSeconds % 1000); // Calculate remaining milliseconds
+              console.log('days', days, 'hours', hours, 'minutes', minutes, 'seconds', seconds, 'milliseconds', milliseconds); // Log the duration for debugging
+                if (days > 0) {
+                  // Include days if greater than 0
+                  return `${days.toString().padStart(2, "0")}:${hours
+                    .toString()
+                    .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+                    .toString()
+                    .padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
+                } else if (hours > 0) {
+                  // Include hours if greater than 0
+                  return `${hours.toString().padStart(2, "0")}:${minutes
+                    .toString()
+                    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}.${milliseconds
+                    .toString()
+                    .padStart(3, "0")}`;
+                } else {
+                  // Only include minutes and seconds if no hours or days
+                  return `${minutes.toString().padStart(2, "0")}:${seconds
+                    .toString()
+                    .padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
+                }
+              })();
+
+            const date = new Date(activity.period); // Convert activity period to Date object
             const completed = activity.values.completionReason.basic.value === 0;
       
+
+            console.log('duration', duration);
             return {
               mode,
               name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
               duration,
+              date, // Ensure the date property is included
               completed,
               pgcrImage: activityDefinitionData.Response?.pgcrImage || null,
               classType: character.classType,

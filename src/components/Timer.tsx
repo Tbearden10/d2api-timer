@@ -7,24 +7,42 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({ startTime, activityName, bungieName }) => {
-  const [elapsedTime, setElapsedTime] = useState("00:00:00.000");
+  const [elapsedTime, setElapsedTime] = useState("00:00.000");
   const animationFrameRef = useRef<number | null>(null);
 
   const formatTime = (milliseconds: number) => {
-    const hrs = Math.floor(milliseconds / 3600000);
-    const mins = Math.floor((milliseconds % 3600000) / 60000);
-    const secs = Math.floor((milliseconds % 60000) / 1000);
-    const ms = milliseconds % 1000;
-    return `${hrs.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${ms
-      .toString()
-      .padStart(3, "0")}`;
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const days = Math.floor(totalSeconds / 86400); // Calculate days
+    const hours = Math.floor((totalSeconds % 86400) / 3600); // Calculate hours after days
+    const minutes = Math.floor((totalSeconds % 3600) / 60); // Calculate minutes after hours
+    const seconds = Math.floor(totalSeconds % 60); // Calculate remaining seconds
+    const ms = milliseconds % 1000; // Calculate remaining milliseconds
+
+    if (days > 0) {
+      // Include days if greater than 0
+      return `${days.toString().padStart(2, "0")}:${hours
+        .toString()
+        .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+    } else if (hours > 0) {
+      // Include hours if greater than 0
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}.${ms
+        .toString()
+        .padStart(3, "0")}`;
+    } else {
+      // Only include minutes and seconds if no hours or days
+      return `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+    }
   };
 
   useEffect(() => {
     if (!startTime) {
-      setElapsedTime("00:00:00.000"); // Reset timer to 0 if no activity
+      setElapsedTime("00:00.000"); // Reset timer to 0 if no activity
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current); // Stop any ongoing animation
       }
