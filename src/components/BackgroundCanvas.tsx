@@ -1,11 +1,14 @@
 "use client";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { StarsEffect } from "./effects/StarsEffect";
+import { SnowEffect } from "./effects/SnowEffect";
+import { RainEffect } from "./effects/RainEffect";
 
 interface BackgroundCanvasProps {
   backgroundColor?: string;
   effectsEnabled?: boolean;
-  effectType?: "stars" | "snow";
+  effectType?: "stars" | "snow" | "rain" | "fireflies" | "aurora" | "galaxy" | "wavegrid";
 }
 
 const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
@@ -54,29 +57,27 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       if (!scene || !renderer || !cameraRef.current) return;
 
       // Update background only when color actually changes
-      if ((scene.background as THREE.Color)?.getHexString() !== new THREE.Color(backgroundColorRef.current).getHexString()) {
+      if (
+        (scene.background as THREE.Color)?.getHexString() !==
+        new THREE.Color(backgroundColorRef.current).getHexString()
+      ) {
         scene.background = new THREE.Color(backgroundColorRef.current);
       }
 
+      // Update the effect
       if (effect) {
-        if (currentEffectType.current === "snow") {
-          const positions = effect.geometry.attributes.position as THREE.BufferAttribute;
-          const array = positions.array as Float32Array;
-
-          for (let i = 0; i < array.length; i += 3) {
-            array[i + 1] -= 1.0; // Fall
-            array[i] += Math.sin(array[i + 1] * 0.01) * 0.2; // Wind drift
-
-            if (array[i + 1] < -2000) {
-              array[i + 1] = 2000;
-              array[i] = Math.random() * 4000 - 2000;
-              array[i + 2] = Math.random() * 4000 - 2000;
-            }
+        if (currentEffectType.current === "stars") {
+          if (StarsEffect.update) {
+            StarsEffect.update(effect);
           }
-
-          positions.needsUpdate = true;
-        } else {
-          effect.rotation.y += 0.001; // Rotate stars
+        } else if (currentEffectType.current === "snow") {
+          if (SnowEffect.update) {
+            SnowEffect.update(effect);
+          }
+        } else if (currentEffectType.current === "rain") {
+          if (RainEffect.update) {
+            RainEffect.update(effect);
+          }
         }
       }
 
@@ -108,7 +109,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     backgroundColorRef.current = backgroundColor;
   }, [backgroundColor]);
 
-  // Update effects (stars/snow toggle)
+  // Update effects (stars/snow/rain toggle)
   useEffect(() => {
     const scene = sceneRef.current;
     currentEffectType.current = effectType;
@@ -129,66 +130,21 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
     if (!effectsEnabled) return;
 
-    let geometry: THREE.BufferGeometry;
-    let material: THREE.PointsMaterial;
-    let points: THREE.Points;
-
+    // Add new effect
+    let newEffect: THREE.Points | null = null;
     if (effectType === "stars") {
-      geometry = new THREE.BufferGeometry();
-      const positions: number[] = [];
-      const colors: number[] = [];
-
-      const randomHSL = () => `hsl(${Math.random() * 360}, 70%, 50%)`;
-
-      for (let i = 0; i < 3000; i++) {
-        positions.push(
-          Math.random() * 4000 - 2000,
-          Math.random() * 4000 - 2000,
-          Math.random() * 4000 - 2000
-        );
-        const color = new THREE.Color(randomHSL());
-        colors.push(color.r, color.g, color.b);
-      }
-
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-
-      material = new THREE.PointsMaterial({
-        size: 3,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.8,
-        blending: THREE.AdditiveBlending,
-      });
-
-      points = new THREE.Points(geometry, material);
-    } else {
-      geometry = new THREE.BufferGeometry();
-      const positions: number[] = [];
-
-      for (let i = 0; i < 1000; i++) {
-        positions.push(
-          Math.random() * 4000 - 2000,
-          Math.random() * 4000 - 2000,
-          Math.random() * 4000 - 2000
-        );
-      }
-
-      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-
-      material = new THREE.PointsMaterial({
-        size: 5,
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.8,
-      });
-
-      points = new THREE.Points(geometry, material);
+      newEffect = StarsEffect.create();
+    } else if (effectType === "snow") {
+      newEffect = SnowEffect.create();
+    } else if (effectType === "rain") {
+      newEffect = RainEffect.create();
     }
 
-    effectRef.current = points;
-    scene.add(points);
-  }, [effectsEnabled, effectType]);
+    if (newEffect) {
+      effectRef.current = newEffect;
+      scene.add(newEffect);
+    }
+  }, [effectsEnabled, effectType]); // Ensure dependencies are correct
 
   return (
     <div

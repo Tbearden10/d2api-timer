@@ -121,7 +121,7 @@ const HomePage: React.FC = () => {
 
   const [backgroundColor, setBackgroundColor] = useState("#000000"); // Default black
   const [effectsEnabled, setEffectsEnabled] = useState(true);
-  const [effectType, setEffectType] = useState<"stars" | "snow">("stars");
+  const [effectType, setEffectType] = useState<"stars" | "snow" | "rain">("stars");
   const [showController, setShowController] = useState(false);
   const controllerRef = useRef<HTMLDivElement | null>(null);
 
@@ -372,7 +372,7 @@ const HomePage: React.FC = () => {
 
     if (savedBackgroundColor) setBackgroundColor(savedBackgroundColor);
     if (savedEffectsEnabled) setEffectsEnabled(savedEffectsEnabled === "true");
-    if (savedEffectType) setEffectType(savedEffectType as "stars" | "snow");
+    if (savedEffectType) setEffectType(savedEffectType as "stars" | "snow" | "rain");
   }, []);
 
   // Save settings to localStorage when they change

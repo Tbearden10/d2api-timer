@@ -1,14 +1,14 @@
 "use client";
-import React, { useEffect } from "react";
-
 interface BackgroundControllerProps {
   backgroundColor: string;
   setBackgroundColor: (color: string) => void;
   effectsEnabled: boolean;
   setEffectsEnabled: (enabled: boolean) => void;
-  effectType: "stars" | "snow";
-  setEffectType: (type: "stars" | "snow") => void;
+  effectType: string;
+  setEffectType: (type: "stars" | "snow" | "rain") => void;
 }
+
+const availableEffects = ["stars", "snow", "rain"];
 
 const BackgroundController: React.FC<BackgroundControllerProps> = ({
   backgroundColor,
@@ -18,30 +18,6 @@ const BackgroundController: React.FC<BackgroundControllerProps> = ({
   effectType,
   setEffectType,
 }) => {
-  // Load preferences from localStorage on mount
-  useEffect(() => {
-    const savedBackgroundColor = localStorage.getItem("backgroundColor");
-    const savedEffectsEnabled = localStorage.getItem("effectsEnabled");
-    const savedEffectType = localStorage.getItem("effectType");
-
-    if (savedBackgroundColor !== null) setBackgroundColor(savedBackgroundColor);
-    if (savedEffectsEnabled !== null) setEffectsEnabled(savedEffectsEnabled === "true");
-    if (savedEffectType !== null) setEffectType(savedEffectType as "stars" | "snow");
-  }, [setBackgroundColor, setEffectsEnabled, setEffectType]);
-
-  // Save preferences to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem("backgroundColor", backgroundColor);
-  }, [backgroundColor]);
-
-  useEffect(() => {
-    localStorage.setItem("effectsEnabled", effectsEnabled.toString());
-  }, [effectsEnabled]);
-
-  useEffect(() => {
-    localStorage.setItem("effectType", effectType);
-  }, [effectType]);
-
   return (
     <div>
       {/* Background Color Selector */}
@@ -72,10 +48,13 @@ const BackgroundController: React.FC<BackgroundControllerProps> = ({
         <select
           id="effect-type"
           value={effectType}
-          onChange={(e) => setEffectType(e.target.value as "stars" | "snow")}
+          onChange={(e) => setEffectType(e.target.value as "stars" | "snow" | "rain")}
         >
-          <option value="stars">Stars</option>
-          <option value="snow">Snow</option>
+          {availableEffects.map((effect) => (
+            <option key={effect} value={effect}>
+              {effect.charAt(0).toUpperCase() + effect.slice(1)}
+            </option>
+          ))}
         </select>
       </div>
     </div>
