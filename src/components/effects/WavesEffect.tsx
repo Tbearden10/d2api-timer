@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import FOG from "vanta/dist/vanta.fog.min";
+import WAVES from "vanta/dist/vanta.waves.min";
 import { SceneEffect } from "../types/Effect";
 
 interface VantaContainer extends THREE.Object3D {
@@ -17,7 +17,7 @@ function getRandomInRange(min: number, max: number): number {
   return parseFloat((Math.random() * (max - min) + min).toFixed(2));
 }
 
-export const FogEffect: SceneEffect = {
+export const WavesEffect: SceneEffect = {
   create: () => {
     // Create a placeholder Points object for Vanta.js
     const geometry = new THREE.BufferGeometry();
@@ -34,34 +34,22 @@ export const FogEffect: SceneEffect = {
     vantaDiv.style.zIndex = "-1";
     document.body.appendChild(vantaDiv);
 
-    // Randomize every aspect
-    const highlightColor = getRandomColor();
-    const midtoneColor   = getRandomColor();
-    const lowlightColor  = getRandomColor();
-    const baseColor      = getRandomColor();
-
-    // Based on your example defaults, you could narrow these ranges
-    // e.g. blurFactor around 0.65, zoom around 2, speed around 3.9
-    const blurFactor = getRandomInRange(0.3, 1.0);
-    const zoom       = getRandomInRange(1.0, 3.0);
-    const speed      = getRandomInRange(0.5, 5.0);
+    // Randomize properties
+    const color = getRandomColor();
+    const shininess = getRandomInRange(10, 100);
+    const waveHeight = getRandomInRange(5, 30);
+    const waveSpeed = getRandomInRange(0.1, 1);
+    const zoom = getRandomInRange(1, 3);
 
     // Initialize Vanta.js effect with randomized settings
-    const vantaEffect = FOG({
+    const vantaEffect = WAVES({
       el: vantaDiv,
       THREE,
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.0,
-      minWidth: 200.0,
-      highlightColor,
-      midtoneColor,
-      lowlightColor,
-      baseColor,
-      blurFactor,
+      color,
+      shininess,
+      waveHeight,
+      waveSpeed,
       zoom,
-      speed,
     });
 
     // Attach for cleanup

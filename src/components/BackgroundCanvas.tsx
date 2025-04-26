@@ -4,11 +4,13 @@ import * as THREE from "three";
 import { StarsEffect } from "./effects/StarsEffect";
 import { SnowEffect } from "./effects/SnowEffect";
 import { FogEffect } from "./effects/FogEffect";
+import { Clouds2Effect } from "./effects/Clouds2Effect";
+import { CellsEffect } from "./effects/CellsEffect";
 
 interface BackgroundCanvasProps {
   backgroundColor?: string;
   effectsEnabled?: boolean;
-  effectType?: "stars" | "snow" | "fog";
+  effectType?: "stars" | "snow" | "fog" | "clouds" | "cells";
 }
 
 const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
@@ -66,19 +68,17 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
       // Update the effect
       if (effect) {
-        if (currentEffectType.current === "stars") {
-          if (StarsEffect.update) {
-            StarsEffect.update(effect as THREE.Points);
-          }
-        } else if (currentEffectType.current === "snow") {
-          if (SnowEffect.update) {
-            SnowEffect.update(effect as THREE.Points);
-          }
-        } else if (currentEffectType.current === "fog") {
-          if (FogEffect.update) {
-            FogEffect.update(effect as THREE.Points);
-          }
-        }
+        if (currentEffectType.current === "stars" && StarsEffect.update) {
+          StarsEffect.update(effect as THREE.Points);
+        } else if (currentEffectType.current === "snow" && SnowEffect.update) {
+          SnowEffect.update(effect as THREE.Points);
+        } else if (currentEffectType.current === "fog" && FogEffect.update) {
+          FogEffect.update(effect as THREE.Points);
+        } else if (currentEffectType.current === "clouds" && Clouds2Effect.update) {
+          Clouds2Effect.update(effect as THREE.Points);
+        } else if (currentEffectType.current === "cells" && CellsEffect.update) {
+          CellsEffect.update(effect as THREE.Points);
+        };
       }
 
       renderer.render(scene, cameraRef.current);
@@ -111,22 +111,25 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
   useEffect(() => {
     const scene = sceneRef.current;
-  
+
     if (!scene) return;
-  
+
     // Remove existing effect
     if (effectRef.current) {
-      // Call the destroy method for the current effect if it exists
       if (currentEffectType.current === "fog" && FogEffect.destroy) {
-        FogEffect.destroy(effectRef.current); // Ensure RainEffect is properly cleaned up
+        FogEffect.destroy(effectRef.current);
+      } else if (currentEffectType.current === "clouds" && Clouds2Effect.destroy) {
+        Clouds2Effect.destroy(effectRef.current);
+      } else if (currentEffectType.current === "cells" && CellsEffect.destroy) {
+        CellsEffect.destroy(effectRef.current);
       }
-  
+
       scene.remove(effectRef.current);
       effectRef.current = null;
     }
-  
+
     if (!effectsEnabled) return;
-  
+
     // Add new effect
     let newEffect: THREE.Object3D | null = null;
     if (effectType === "stars") {
@@ -135,16 +138,19 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       newEffect = SnowEffect.create();
     } else if (effectType === "fog") {
       newEffect = FogEffect.create();
-    }
-  
+    } else if (effectType === "clouds") {
+      newEffect = Clouds2Effect.create();
+    } else if (effectType === "cells") {
+      newEffect = CellsEffect.create();
+    } 
+
     if (newEffect) {
       effectRef.current = newEffect;
       scene.add(newEffect);
     }
-  
-    // Update the current effect type
+
     currentEffectType.current = effectType;
-  }, [effectsEnabled, effectType]); // Ensure dependencies are correct
+  }, [effectsEnabled, effectType]);
 
   return (
     <div

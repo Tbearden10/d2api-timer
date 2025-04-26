@@ -5,10 +5,18 @@ interface BackgroundControllerProps {
   effectsEnabled: boolean;
   setEffectsEnabled: (enabled: boolean) => void;
   effectType: string;
-  setEffectType: (type: "stars" | "snow" | "fog") => void;
+  setEffectType: (
+    type: "stars" | "snow" | "fog" | "clouds"| "cells"
+  ) => void;
 }
 
-const availableEffects = ["stars", "snow", "fog"];
+const availableEffects = [
+  "stars",
+  "snow",
+  "fog",
+  "clouds",
+  "cells",
+];
 
 const BackgroundController: React.FC<BackgroundControllerProps> = ({
   backgroundColor,
@@ -48,7 +56,11 @@ const BackgroundController: React.FC<BackgroundControllerProps> = ({
         <select
           id="effect-type"
           value={effectType}
-          onChange={(e) => setEffectType(e.target.value as "stars" | "snow" | "fog")}
+          onChange={(e) =>
+            setEffectType(
+              e.target.value as "stars" | "snow" | "fog" | "clouds" | "cells"
+            )
+          }
         >
           {availableEffects.map((effect) => (
             <option key={effect} value={effect}>

@@ -121,7 +121,7 @@ const HomePage: React.FC = () => {
 
   const [backgroundColor, setBackgroundColor] = useState("#000000"); // Default black
   const [effectsEnabled, setEffectsEnabled] = useState(true);
-  const [effectType, setEffectType] = useState<"stars" | "snow" | "fog">("stars");
+  const [effectType, setEffectType] = useState<"stars" | "snow" | "fog" | "clouds" | "cells">("stars");
   const [showController, setShowController] = useState(false);
   const controllerRef = useRef<HTMLDivElement | null>(null);
 
