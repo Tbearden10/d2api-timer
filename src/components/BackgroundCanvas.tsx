@@ -8,7 +8,7 @@ import { RainEffect } from "./effects/RainEffect";
 interface BackgroundCanvasProps {
   backgroundColor?: string;
   effectsEnabled?: boolean;
-  effectType?: "stars" | "snow" | "rain" | "fireflies" | "aurora" | "galaxy" | "wavegrid";
+  effectType?: "stars" | "snow" | "rain";
 }
 
 const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
@@ -20,7 +20,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const effectRef = useRef<THREE.Points | null>(null);
+  const effectRef = useRef<THREE.Object3D | null>(null);
   const currentEffectType = useRef(effectType);
   const backgroundColorRef = useRef<string>(backgroundColor);
 
@@ -68,15 +68,15 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       if (effect) {
         if (currentEffectType.current === "stars") {
           if (StarsEffect.update) {
-            StarsEffect.update(effect);
+            StarsEffect.update(effect as THREE.Points);
           }
         } else if (currentEffectType.current === "snow") {
           if (SnowEffect.update) {
-            SnowEffect.update(effect);
+            SnowEffect.update(effect as THREE.Points);
           }
         } else if (currentEffectType.current === "rain") {
           if (RainEffect.update) {
-            RainEffect.update(effect);
+            RainEffect.update(effect as THREE.Points);
           }
         }
       }
@@ -109,29 +109,26 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     backgroundColorRef.current = backgroundColor;
   }, [backgroundColor]);
 
-  // Update effects (stars/snow/rain toggle)
   useEffect(() => {
     const scene = sceneRef.current;
-    currentEffectType.current = effectType;
-
+  
     if (!scene) return;
-
+  
     // Remove existing effect
     if (effectRef.current) {
-      scene.remove(effectRef.current);
-      effectRef.current.geometry.dispose();
-      if (Array.isArray(effectRef.current.material)) {
-        effectRef.current.material.forEach((mat) => mat.dispose());
-      } else {
-        effectRef.current.material.dispose();
+      // Call the destroy method for the current effect if it exists
+      if (currentEffectType.current === "rain" && RainEffect.destroy) {
+        RainEffect.destroy(effectRef.current); // Ensure RainEffect is properly cleaned up
       }
+  
+      scene.remove(effectRef.current);
       effectRef.current = null;
     }
-
+  
     if (!effectsEnabled) return;
-
+  
     // Add new effect
-    let newEffect: THREE.Points | null = null;
+    let newEffect: THREE.Object3D | null = null;
     if (effectType === "stars") {
       newEffect = StarsEffect.create();
     } else if (effectType === "snow") {
@@ -139,11 +136,14 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     } else if (effectType === "rain") {
       newEffect = RainEffect.create();
     }
-
+  
     if (newEffect) {
       effectRef.current = newEffect;
       scene.add(newEffect);
     }
+  
+    // Update the current effect type
+    currentEffectType.current = effectType;
   }, [effectsEnabled, effectType]); // Ensure dependencies are correct
 
   return (

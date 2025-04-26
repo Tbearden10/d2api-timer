@@ -4,4 +4,5 @@ import * as THREE from "three";
 export interface SceneEffect {
   create: () => THREE.Points;
   update?: (points: THREE.Points) => void;
+  destroy?: (object: THREE.Object3D) => void;
 }
