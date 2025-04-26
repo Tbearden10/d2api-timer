@@ -3,12 +3,12 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { StarsEffect } from "./effects/StarsEffect";
 import { SnowEffect } from "./effects/SnowEffect";
-import { RainEffect } from "./effects/RainEffect";
+import { FogEffect } from "./effects/FogEffect";
 
 interface BackgroundCanvasProps {
   backgroundColor?: string;
   effectsEnabled?: boolean;
-  effectType?: "stars" | "snow" | "rain";
+  effectType?: "stars" | "snow" | "fog";
 }
 
 const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
@@ -74,9 +74,9 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
           if (SnowEffect.update) {
             SnowEffect.update(effect as THREE.Points);
           }
-        } else if (currentEffectType.current === "rain") {
-          if (RainEffect.update) {
-            RainEffect.update(effect as THREE.Points);
+        } else if (currentEffectType.current === "fog") {
+          if (FogEffect.update) {
+            FogEffect.update(effect as THREE.Points);
           }
         }
       }
@@ -117,8 +117,8 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     // Remove existing effect
     if (effectRef.current) {
       // Call the destroy method for the current effect if it exists
-      if (currentEffectType.current === "rain" && RainEffect.destroy) {
-        RainEffect.destroy(effectRef.current); // Ensure RainEffect is properly cleaned up
+      if (currentEffectType.current === "fog" && FogEffect.destroy) {
+        FogEffect.destroy(effectRef.current); // Ensure RainEffect is properly cleaned up
       }
   
       scene.remove(effectRef.current);
@@ -133,8 +133,8 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       newEffect = StarsEffect.create();
     } else if (effectType === "snow") {
       newEffect = SnowEffect.create();
-    } else if (effectType === "rain") {
-      newEffect = RainEffect.create();
+    } else if (effectType === "fog") {
+      newEffect = FogEffect.create();
     }
   
     if (newEffect) {

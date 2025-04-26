@@ -7,7 +7,7 @@ interface VantaContainer extends THREE.Object3D {
   vantaDiv?: HTMLDivElement;
 }
 
-export const RainEffect: SceneEffect = {
+export const FogEffect: SceneEffect = {
   create: () => {
     // Create a placeholder Points object for Vanta.js
     const geometry = new THREE.BufferGeometry();
