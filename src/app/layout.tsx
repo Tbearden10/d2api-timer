@@ -4,7 +4,7 @@ import "./globals.css";
 import { ReactNode } from "react";
 import Footer from "../components/Footer";
 import BackgroundCanvas from "../components/BackgroundCanvas";
-import { Analytics } from "@vercel/analytics/next"; // <-- import this
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
