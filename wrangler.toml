@@ -1,4 +1,6 @@
-# Minimal Pages config: don't put account_id or build here.
+
 name = "d2api-timer"
-# point Pages at the Next 15 export output
+
 pages_build_output_dir = "out"
+
+compatibility_date = "2024-11-12"
