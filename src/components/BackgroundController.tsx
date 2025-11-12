@@ -6,7 +6,7 @@ interface BackgroundControllerProps {
   setEffectsEnabled: (enabled: boolean) => void;
   effectType: string;
   setEffectType: (
-    type: "stars" | "snow" | "fog" | "clouds"| "cells"
+    type: "stars" | "snow" | "fog" | "cells"
   ) => void;
 }
 
@@ -14,7 +14,6 @@ const availableEffects = [
   "stars",
   "snow",
   "fog",
-  "clouds",
   "cells",
 ];
 
@@ -58,7 +57,7 @@ const BackgroundController: React.FC<BackgroundControllerProps> = ({
           value={effectType}
           onChange={(e) =>
             setEffectType(
-              e.target.value as "stars" | "snow" | "fog" | "clouds" | "cells"
+              e.target.value as "stars" | "snow" | "fog" | "cells"
             )
           }
         >

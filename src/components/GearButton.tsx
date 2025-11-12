@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface GearButtonProps {
   onClick: () => void;
@@ -27,7 +28,7 @@ const GearButton: React.FC<GearButtonProps> = ({ onClick }) => (
     style={gearButtonStyle}
     aria-label="Toggle background controller"
   >
-    <img
+    <Image
       src="/gear-icon.svg" // Path to your gear icon
       alt="Gear Icon"
       style={{ width: "24px", height: "24px", filter: "invert(1)" }} // Adjust size as needed

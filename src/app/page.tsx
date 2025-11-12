@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from "next/image";
 import SearchContainer from '@/components/SearchContainer';
 import TimerContainer from '../components/TimerContainer';
 import ActivityContainer from '@/components/ActivityContainer';
@@ -121,7 +122,7 @@ const HomePage: React.FC = () => {
 
   const [backgroundColor, setBackgroundColor] = useState("#000000"); // Default black
   const [effectsEnabled, setEffectsEnabled] = useState(true);
-  const [effectType, setEffectType] = useState<"stars" | "snow" | "fog" | "clouds" | "cells">("stars");
+  const [effectType, setEffectType] = useState<"stars" | "snow" | "fog" | "cells">("stars");
   const [showController, setShowController] = useState(false);
   const controllerRef = useRef<HTMLDivElement | null>(null);
 
@@ -288,7 +289,6 @@ const HomePage: React.FC = () => {
                 const minutes = Math.floor((totalSeconds % 3600) / 60); // Calculate minutes after hours
                 const seconds = Math.floor(totalSeconds % 60); // Calculate remaining seconds
                 const milliseconds = Math.floor(totalSeconds % 1000); // Calculate remaining milliseconds
-              console.log('days', days, 'hours', hours, 'minutes', minutes, 'seconds', seconds, 'milliseconds', milliseconds); // Log the duration for debugging
                 if (days > 0) {
                   // Include days if greater than 0
                   return `${days.toString().padStart(2, "0")}:${hours
@@ -315,7 +315,6 @@ const HomePage: React.FC = () => {
             const completed = activity.values.completionReason.basic.value === 0;
       
 
-            console.log('duration', duration);
             return {
               mode,
               name: activityDefinitionData.Response?.displayProperties?.name || 'Unknown Activity',
@@ -497,7 +496,7 @@ const HomePage: React.FC = () => {
                           alignItems: "center",
                         }}
                       >
-                        <img
+                        <Image
                           src={iconPath} // Use the mapped icon
                           alt={characterClass}
                           style={{

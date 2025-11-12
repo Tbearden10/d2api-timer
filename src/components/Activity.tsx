@@ -18,7 +18,6 @@ const Activity: React.FC<ActivityProps> = ({
   pgcrImage,
 }) => {
   // Helper function to format duration
-  console.log("Activity Duration:", activityDuration); // Log the duration for debugging
 
   return (
     <div
