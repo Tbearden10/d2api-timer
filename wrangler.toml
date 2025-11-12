@@ -1,13 +1,4 @@
+# Minimal Pages config: don't put account_id or build here.
 name = "d2api-timer"
-account_id = "5e7fb995b74586d322a72a99770b31dc"
-compatibility_date = "2025-11-12"
-
-# Tell Pages where your static build output lives.
-# For Next.js 15+ static export, use the new export output path:
+# point Pages at the Next 15 export output
 pages_build_output_dir = ".next/output/export"
-
-[build]
-# Install, build, and remove the .next cache so large .pack files aren't uploaded.
-# Note: `next export` was removed in Next.js 15 in favor of `output: 'export'` in next.config.js,
-# so this command just builds (assuming you set `output: 'export'`).
-command = "npm ci && npm run build && npx rimraf .next/cache || true"
