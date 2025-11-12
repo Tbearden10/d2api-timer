@@ -1,0 +1,12 @@
+name = "d2api-timer"
+account_id = 5e7fb995b74586d322a72a99770b31dc
+compatibility_date = "2025-11-12"
+
+[build]
+# Build a static export of your Next.js site and remove the .next cache
+# so large cache files are not uploaded to Pages (avoids the 25 MiB limit).
+# This assumes you use `next export` to produce a static "out" folder.
+command = "npm ci && npm run build && npm run export && npx rimraf .next/cache || true"
+
+# Upload the static output dir produced by `next export`
+upload = { dir = "out" }

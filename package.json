@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next export",
+    "prepublish": "npm run build && npm run export"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.8",
