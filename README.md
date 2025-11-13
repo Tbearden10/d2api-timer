@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# d2api-timer
 
-## Getting Started
+Destiny 2 Live Activity Timer — a small web app that shows live timers/countdowns for Destiny 2 activities using the Destiny API. It's lightweight and focused on giving accurate, easy-to-read timers for in-game activities.
 
-First, run the development server:
+What it does
+- Fetches live activity data and displays countdowns for active activities.
+- Updates timers in the browser so you can track activity windows without switching apps.
+- Minimal, easy-to-run frontend.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Tech stack
+- TypeScript (primary)
+- JavaScript
+- CSS
+- React
+- Uses Bungie.net API to fetch activity information
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Quick start
+1. Clone the repo
+   git clone https://github.com/Tbearden10/d2api-timer.git
+   cd d2api-timer
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Install dependencies
+   npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Configure environment
+   - Create a .env (or similar) if the app needs a Bungie API key:
+     BUNGIE_API_KEY=your_api_key_here
 
-## Learn More
+4. Run (development)
+   npm run dev
 
-To learn more about Next.js, take a look at the following resources:
+5. Build (production)
+   npm run build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Notes
+- If you plan to use the Bungie API, obtain an API key from Bungie.net and add it to your environment.
+- The repo is primarily TypeScript and browser-based; adjust commands if your environment uses yarn or pnpm.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributing
+- Bug reports, improvements, and PRs are welcome.
